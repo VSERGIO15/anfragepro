@@ -154,16 +154,18 @@ app.get("/api/requests",auth,async(req,res)=>{
    requests=d.requests.sort((a,b)=>b.id-a.id);
   }
   requests=requests.filter(r=>!r.provider_id||Number(r.provider_id)===Number(req.session.userId));
-  const city=String(me?.city||"").trim().toLowerCase();
-  const services=String(me?.services||"").toLowerCase().split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+  const normalize=x=>String(x||"").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+  const city=normalize(me?.city);
+  const services=normalize(me?.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
   const scored=requests.map(r=>{
-   const place=String(r.place||"").toLowerCase();
-   const serviceType=String(r.service_type||"").toLowerCase();
-   const service=String(r.service||"").toLowerCase();
+   const place=normalize(r.place);
+   const serviceType=normalize(r.service_type);
+   const service=normalize(r.service);
    let score=0;
-   if(city && place && (place.includes(city)||city.includes(place)))score+=1;
-   if(services.some(s=>serviceType.includes(s)||service.includes(s)||s.includes(serviceType)||s.includes(service)))score+=1;
-   return {...r,match_score:score,matched:score>0};
+   const reasons=[];
+   if(city && place && (place.includes(city)||city.includes(place))){score+=1;reasons.push("Ort passt");}
+   if(services.some(s=>s && (serviceType.includes(s)||service.includes(s)||s.includes(serviceType)||s.includes(service)))){score+=1;reasons.push("Leistung passt");}
+   return {...r,match_score:score,matched:score>0,match_reasons:reasons};
   }).sort((a,b)=>(b.match_score-a.match_score)||((b.id||0)-(a.id||0)));
   res.json(scored.map(r=>{
    if(r.provider_id&&Number(r.provider_id)===Number(req.session.userId)) return r;
