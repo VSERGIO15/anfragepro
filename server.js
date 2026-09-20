@@ -108,7 +108,8 @@ app.post("/api/login",async(req,res)=>{
   if(useDb) u=(await pool.query("SELECT * FROM users WHERE email=$1",[email])).rows[0];
   else u=read().users.find(x=>x.email===email);
   const password=String(req.body.password||"");
-  if(!u||!u.password_hash||!(await bcrypt.compare(password,u.password_hash)))return res.status(401).json({error:"Login-Daten nicht korrekt."});
+  if(!u)return res.status(401).json({error:"E-Mail nicht gefunden."});
+  if(!u.password_hash||!(await bcrypt.compare(password,u.password_hash)))return res.status(401).json({error:"Passwort falsch."});
   req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));res.json({ok:true,company:u.company});
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler beim Login."});}
 });
