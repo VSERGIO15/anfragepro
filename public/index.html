@@ -1,14 +1,114 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AnfragePro</title>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AnfragePro – Dienstleistungen einfach finden</title>
+<meta name="description" content="AnfragePro verbindet Kunden mit Dienstleistern. Anfrage erstellen oder neue Aufträge erhalten.">
 <style>
-body{font-family:Arial,sans-serif;background:#f5f6f8;margin:0;color:#17202a}.wrap{max-width:760px;margin:35px auto;padding:16px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:18px}h1{margin:0 0 8px}input,select,textarea{width:100%;box-sizing:border-box;padding:12px;margin:6px 0 12px;border:1px solid #d1d5db;border-radius:9px}button{padding:12px 15px;border:0;border-radius:9px;background:#111827;color:#fff;cursor:pointer}.secondary{background:#fff;color:#111;border:1px solid #d1d5db}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.muted{color:#6b7280}.hide{display:none}.tabs{display:flex;gap:8px;flex-wrap:wrap}.req{border:1px solid #e5e7eb;padding:15px;border-radius:11px;margin:10px 0}@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
-</style></head><body><div class="wrap">
-<div class="card"><h1>AnfragePro</h1><p class="muted">Server-MVP v2 — ohne Python und ohne SQLite</p>
-<div class="tabs"><button onclick="view('login')">Login</button><button onclick="view('register')" class="secondary">Registrieren</button><button onclick="view('request')" class="secondary">Kundenanfrage</button><button onclick="view('dash')" class="secondary">Dashboard</button></div></div>
+:root{--ink:#17202a;--muted:#667085;--line:#e6e9ee;--bg:#f6f8fb;--card:#fff;--accent:#111827;--soft:#eef2f7}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:auto;padding:0 22px}
+header{padding:22px 0}
+.nav{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:25px;font-weight:800;letter-spacing:-.5px}
+.logo span{color:#64748b}
+.navlinks{display:flex;gap:10px;align-items:center}
+.navlinks button{background:transparent;color:var(--ink);border:1px solid transparent}
+.hero{padding:58px 0 44px}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:center}
+.badge{display:inline-block;background:var(--soft);padding:8px 12px;border-radius:999px;font-size:14px;font-weight:700;margin-bottom:18px}
+h1{font-size:clamp(42px,6vw,70px);line-height:1.02;letter-spacing:-2.5px;margin:0 0 20px}
+.lead{font-size:20px;line-height:1.55;color:var(--muted);max-width:680px;margin:0 0 28px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.choice{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:22px;text-align:left;cursor:pointer;transition:.15s}
+.choice:hover{transform:translateY(-2px);box-shadow:0 10px 30px #11182712}
+.choice.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.choice .icon{font-size:27px;margin-bottom:15px}
+.choice strong{display:block;font-size:18px;margin-bottom:7px}
+.choice small{opacity:.72;font-size:14px}
+.hero-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 18px 50px #11182710}
+.hero-card h3{margin:0 0 8px;font-size:22px}
+.hero-card p{color:var(--muted);line-height:1.5}
+.flow{display:grid;gap:12px;margin-top:20px}
+.flow-item{display:flex;gap:14px;align-items:center;padding:14px;background:#f8fafc;border-radius:14px}
+.num{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+section{padding:48px 0}
+.section-title{text-align:center;font-size:32px;letter-spacing:-1px;margin:0 0 10px}
+.section-lead{text-align:center;color:var(--muted);margin:0 auto 28px;max-width:650px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+.feature .icon{font-size:26px}.feature h3{margin:14px 0 8px}.feature p{color:var(--muted);line-height:1.5;margin:0}
+.cta{background:var(--accent);color:#fff;border-radius:24px;padding:38px;display:flex;justify-content:space-between;gap:24px;align-items:center}
+.cta h2{margin:0 0 8px;font-size:30px}.cta p{margin:0;color:#cbd5e1}
+footer{padding:34px 0 45px;color:var(--muted);font-size:14px}
+.footer-inner{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding-top:22px}
+.footer-links{display:flex;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin:24px 0}
+input,select,textarea{width:100%;box-sizing:border-box;padding:12px;margin:6px 0 12px;border:1px solid #d1d5db;border-radius:9px;font:inherit}
+textarea{min-height:110px}
+button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
+.secondary{background:#fff;color:var(--ink);border:1px solid #d1d5db}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.muted{color:var(--muted)}.hide{display:none}.tabs{display:flex;gap:8px;flex-wrap:wrap}.req{border:1px solid var(--line);padding:15px;border-radius:11px;margin:10px 0}
+@media(max-width:800px){.hero-grid{grid-template-columns:1fr}.features{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.navlinks{display:none}.cta{display:block}.cta button{margin-top:20px}}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}h1{letter-spacing:-1.5px}.hero{padding-top:30px}}
+</style>
+</head>
+<body>
+<div id="home">
+<header><div class="wrap nav">
+<a class="logo" href="#" onclick="showHome();return false">Anfrage<span>Pro</span></a>
+<div class="navlinks"><button onclick="view('login')">Einloggen</button><button class="secondary" onclick="view('register')">Für Dienstleister</button></div>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap hero-grid">
+<div>
+<div class="badge">Einfach. Direkt. AnfragePro.</div>
+<h1>Dienstleistungen einfach finden oder Aufträge erhalten.</h1>
+<p class="lead">AnfragePro verbindet Kunden mit Dienstleistern. Erstelle eine Anfrage oder verwalte neue Aufträge übersichtlich an einem Ort.</p>
+<div class="actions">
+<button class="choice primary" onclick="view('request')"><div class="icon">🔎</div><strong>Ich suche einen Dienstleister</strong><small>Anfrage kostenlos erstellen</small></button>
+<button class="choice" onclick="view('register')"><div class="icon">🏢</div><strong>Ich biete Dienstleistungen an</strong><small>Anfragen erhalten und verwalten</small></button>
+</div>
+</div>
+<div class="hero-card">
+<h3>So funktioniert AnfragePro</h3>
+<p>In wenigen Schritten von der Anfrage zum passenden Auftrag.</p>
+<div class="flow">
+<div class="flow-item"><span class="num">1</span><div><strong>Anfrage erstellen</strong><br><span class="muted">Beschreibe, was du benötigst.</span></div></div>
+<div class="flow-item"><span class="num">2</span><div><strong>Passenden Dienstleister finden</strong><br><span class="muted">Anfragen werden übersichtlich verwaltet.</span></div></div>
+<div class="flow-item"><span class="num">3</span><div><strong>Auftrag bearbeiten</strong><br><span class="muted">Status und Kontaktdaten im Blick behalten.</span></div></div>
+</div>
+</div>
+</div></section>
+
+<section><div class="wrap">
+<h2 class="section-title">Eine Plattform für beide Seiten</h2>
+<p class="section-lead">AnfragePro bringt Kunden und Unternehmen in einem einfachen Ablauf zusammen.</p>
+<div class="features">
+<div class="feature"><div class="icon">📝</div><h3>Klare Anfragen</h3><p>Leistung, Ort, Termin, Umfang und Beschreibung werden strukturiert erfasst.</p></div>
+<div class="feature"><div class="icon">🏢</div><h3>Für Dienstleister</h3><p>Neue Anfragen zentral ansehen und den Bearbeitungsstatus im Dashboard verfolgen.</p></div>
+<div class="feature"><div class="icon">⚡</div><h3>Einfacher Ablauf</h3><p>Weniger Hin und Her: wichtige Informationen stehen direkt in der Anfrage.</p></div>
+</div>
+</div></section>
+
+<section><div class="wrap"><div class="cta">
+<div><h2>Bereit für die erste Anfrage?</h2><p>Starte direkt als Kunde oder registriere dein Unternehmen.</p></div>
+<button onclick="view('request')">Anfrage erstellen</button>
+</div></div></section>
+</main>
+
+<footer><div class="wrap footer-inner"><div>© 2026 AnfragePro</div><div class="footer-links"><a href="#" onclick="view('login');return false">Login</a><a href="#" onclick="view('register');return false">Registrieren</a><a href="#" onclick="view('request');return false">Kundenanfrage</a></div></div></footer>
+</div>
+
+<div id="app" class="wrap hide">
+<div class="card"><div class="tabs"><button onclick="showHome()">Startseite</button><button onclick="view('login')" class="secondary">Login</button><button onclick="view('register')" class="secondary">Registrieren</button><button onclick="view('request')" class="secondary">Kundenanfrage</button><button onclick="view('dash')" class="secondary">Dashboard</button></div></div>
 
 <div id="login" class="card"><h2>Unternehmer Login</h2><form onsubmit="login(event)"><input id="le" type="email" placeholder="E-Mail" required><input id="lp" type="password" placeholder="Passwort" required><button>Einloggen</button></form><p id="lmsg"></p></div>
-
-<div id="register" class="card hide"><h2>Unternehmen registrieren</h2><form onsubmit="register(event)"><input id="rc" placeholder="Firmenname" required><input id="re" type="email" placeholder="E-Mail" required><input id="rp" type="password" placeholder="Passwort (mind. 8 Zeichen)" required><button>Konto erstellen</button></form><p id="rmsg"></p></div>
-
+<div id="register" class="card hide"><h2>Unternehmen registrieren</h2><form onsubmit="register(event)"><input id="rc" placeholder="Firmenname" required><input id="re" type="email" placeholder="E-Mail" required><input id="rp" type="password" placeholder="Passwort (mind. 8 Zeichen)" minlength="8" required><button>Konto erstellen</button></form><p id="rmsg"></p></div>
 <div id="request" class="card hide"><h2>Kundenanfrage</h2><form onsubmit="sendRequest(event)" enctype="multipart/form-data"><div class="grid">
 <div><label>Service</label><select id="rt"><option>Reinigung</option><option>Gartenbau</option><option>Handwerk</option></select></div>
 <div><label>Leistung</label><input id="rs" placeholder="z. B. Fensterreinigung" required></div>
@@ -19,16 +119,19 @@ body{font-family:Arial,sans-serif;background:#f5f6f8;margin:0;color:#17202a}.wra
 <div><label>Name</label><input id="rn" required></div><div><label>Telefon</label><input id="rphone" required></div>
 <div class="full"><label>E-Mail</label><input id="remail" type="email" required></div>
 </div><button>Absenden</button></form><p id="rnotice"></p></div>
-
 <div id="dash" class="card hide"><h2>Dashboard</h2><p id="who" class="muted"></p><button onclick="loadDash()">Aktualisieren</button> <button onclick="logout()" class="secondary">Logout</button><div id="requests" style="margin-top:18px"></div></div>
 </div>
+
 <script>
 const $=id=>document.getElementById(id);
-function view(id){["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");if(id==="dash")loadDash()}
+function showHome(){$("home").classList.remove("hide");$("app").classList.add("hide");window.scrollTo({top:0,behavior:"smooth"})}
+function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash()}
 async function api(url,opt={}){const r=await fetch(url,opt),d=await r.json();if(!r.ok)throw Error(d.error||"Fehler");return d}
 async function register(e){e.preventDefault();try{await api("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:$("rc").value,email:$("re").value,password:$("rp").value})});$("rmsg").textContent="Konto erstellt.";view("dash")}catch(x){$("rmsg").textContent=x.message}}
 async function login(e){e.preventDefault();try{await api("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("le").value,password:$("lp").value})});$("lmsg").textContent="Erfolgreich eingeloggt.";view("dash")}catch(x){$("lmsg").textContent=x.message}}
-async function logout(){await api("/api/logout",{method:"POST"});view("login")}
+async function logout(){await api("/api/logout",{method:"POST"});showHome()}
 async function sendRequest(e){e.preventDefault();try{const me=await api("/api/me"),f=new FormData();f.append("user_id",me.id);f.append("service_type",$("rt").value);f.append("service",$("rs").value);f.append("place",$("rplace").value);f.append("date",$("rdate").value);f.append("scope",$("rscope").value);f.append("frequency",$("rfreq").value);f.append("description",$("rdesc").value);f.append("name",$("rn").value);f.append("phone",$("rphone").value);f.append("email",$("remail").value);for(const p of $("rphotos").files)f.append("photos",p);await api("/api/requests",{method:"POST",body:f});$("rnotice").textContent="Anfrage gespeichert.";e.target.reset()}catch(x){$("rnotice").textContent=x.message}}
 async function loadDash(){try{const me=await api("/api/me");$("who").textContent=me.company+" · "+me.email;const rs=await api("/api/requests");$("requests").innerHTML=rs.length?rs.map(r=>`<div class="req"><b>${r.service_type} · ${r.service}</b><br>📍 ${r.place||"—"} · 📅 ${r.date||"—"} · 📷 ${r.photo_count}<br><b>${r.name}</b> · ${r.phone} · ${r.email}<br>${r.description||""}<br><small>Status: ${r.status}</small></div>`).join(""):"Noch keine Anfragen."}catch(x){$("requests").innerHTML="<p>Bitte zuerst einloggen.</p>"}}
-</script></body></html>
+</script>
+</body>
+</html>
