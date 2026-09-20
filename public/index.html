@@ -1,0 +1,34 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AnfragePro</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f5f6f8;margin:0;color:#17202a}.wrap{max-width:760px;margin:35px auto;padding:16px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:18px}h1{margin:0 0 8px}input,select,textarea{width:100%;box-sizing:border-box;padding:12px;margin:6px 0 12px;border:1px solid #d1d5db;border-radius:9px}button{padding:12px 15px;border:0;border-radius:9px;background:#111827;color:#fff;cursor:pointer}.secondary{background:#fff;color:#111;border:1px solid #d1d5db}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.muted{color:#6b7280}.hide{display:none}.tabs{display:flex;gap:8px;flex-wrap:wrap}.req{border:1px solid #e5e7eb;padding:15px;border-radius:11px;margin:10px 0}@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style></head><body><div class="wrap">
+<div class="card"><h1>AnfragePro</h1><p class="muted">Server-MVP v2 — ohne Python und ohne SQLite</p>
+<div class="tabs"><button onclick="view('login')">Login</button><button onclick="view('register')" class="secondary">Registrieren</button><button onclick="view('request')" class="secondary">Kundenanfrage</button><button onclick="view('dash')" class="secondary">Dashboard</button></div></div>
+
+<div id="login" class="card"><h2>Unternehmer Login</h2><form onsubmit="login(event)"><input id="le" type="email" placeholder="E-Mail" required><input id="lp" type="password" placeholder="Passwort" required><button>Einloggen</button></form><p id="lmsg"></p></div>
+
+<div id="register" class="card hide"><h2>Unternehmen registrieren</h2><form onsubmit="register(event)"><input id="rc" placeholder="Firmenname" required><input id="re" type="email" placeholder="E-Mail" required><input id="rp" type="password" placeholder="Passwort (mind. 8 Zeichen)" required><button>Konto erstellen</button></form><p id="rmsg"></p></div>
+
+<div id="request" class="card hide"><h2>Kundenanfrage</h2><form onsubmit="sendRequest(event)" enctype="multipart/form-data"><div class="grid">
+<div><label>Service</label><select id="rt"><option>Reinigung</option><option>Gartenbau</option><option>Handwerk</option></select></div>
+<div><label>Leistung</label><input id="rs" placeholder="z. B. Fensterreinigung" required></div>
+<div><label>Ort</label><input id="rplace" value="Gifhorn"></div><div><label>Termin</label><input id="rdate" type="date"></div>
+<div><label>Umfang</label><input id="rscope" placeholder="z. B. 120 m²"></div><div><label>Häufigkeit</label><input id="rfreq" placeholder="Einmalig"></div>
+<div class="full"><label>Beschreibung</label><textarea id="rdesc"></textarea></div>
+<div class="full"><label>Fotos</label><input id="rphotos" type="file" multiple accept="image/*"></div>
+<div><label>Name</label><input id="rn" required></div><div><label>Telefon</label><input id="rphone" required></div>
+<div class="full"><label>E-Mail</label><input id="remail" type="email" required></div>
+</div><button>Absenden</button></form><p id="rnotice"></p></div>
+
+<div id="dash" class="card hide"><h2>Dashboard</h2><p id="who" class="muted"></p><button onclick="loadDash()">Aktualisieren</button> <button onclick="logout()" class="secondary">Logout</button><div id="requests" style="margin-top:18px"></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function view(id){["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");if(id==="dash")loadDash()}
+async function api(url,opt={}){const r=await fetch(url,opt),d=await r.json();if(!r.ok)throw Error(d.error||"Fehler");return d}
+async function register(e){e.preventDefault();try{await api("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:$("rc").value,email:$("re").value,password:$("rp").value})});$("rmsg").textContent="Konto erstellt.";view("dash")}catch(x){$("rmsg").textContent=x.message}}
+async function login(e){e.preventDefault();try{await api("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("le").value,password:$("lp").value})});$("lmsg").textContent="Erfolgreich eingeloggt.";view("dash")}catch(x){$("lmsg").textContent=x.message}}
+async function logout(){await api("/api/logout",{method:"POST"});view("login")}
+async function sendRequest(e){e.preventDefault();try{const me=await api("/api/me"),f=new FormData();f.append("user_id",me.id);f.append("service_type",$("rt").value);f.append("service",$("rs").value);f.append("place",$("rplace").value);f.append("date",$("rdate").value);f.append("scope",$("rscope").value);f.append("frequency",$("rfreq").value);f.append("description",$("rdesc").value);f.append("name",$("rn").value);f.append("phone",$("rphone").value);f.append("email",$("remail").value);for(const p of $("rphotos").files)f.append("photos",p);await api("/api/requests",{method:"POST",body:f});$("rnotice").textContent="Anfrage gespeichert.";e.target.reset()}catch(x){$("rnotice").textContent=x.message}}
+async function loadDash(){try{const me=await api("/api/me");$("who").textContent=me.company+" · "+me.email;const rs=await api("/api/requests");$("requests").innerHTML=rs.length?rs.map(r=>`<div class="req"><b>${r.service_type} · ${r.service}</b><br>📍 ${r.place||"—"} · 📅 ${r.date||"—"} · 📷 ${r.photo_count}<br><b>${r.name}</b> · ${r.phone} · ${r.email}<br>${r.description||""}<br><small>Status: ${r.status}</small></div>`).join(""):"Noch keine Anfragen."}catch(x){$("requests").innerHTML="<p>Bitte zuerst einloggen.</p>"}}
+</script></body></html>
