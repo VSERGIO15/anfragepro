@@ -47,12 +47,21 @@ app.get("/api/requests",auth,(req,res)=>{
 app.post("/api/requests",upload.array("photos",8),(req,res)=>{
  const {service_type,service,place,date,scope,frequency,description,name,phone,email}=req.body;
  const d=read();
- const r={id:Date.now(),user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count:(req.files||[]).length,status:"new",created_at:new Date().toISOString()};
+ const r={id:Date.now(),user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count:(req.files||[]).length,status:"new",provider_id:null,created_at:new Date().toISOString()};
  d.requests.push(r); write(d); res.json({ok:true,id:r.id});
 });
-app.patch("/api/requests/:id",auth,(req,res)=>{
- const d=read(),r=d.requests.find(x=>x.id===Number(req.params.id)&&x.user_id===req.session.userId);
+app.post("/api/requests/:id/claim",auth,(req,res)=>{
+ const d=read(),r=d.requests.find(x=>x.id===Number(req.params.id));
  if(!r)return res.status(404).json({error:"Nicht gefunden"});
+ if(r.provider_id&&r.provider_id!==req.session.userId)return res.status(409).json({error:"Anfrage bereits übernommen."});
+ r.provider_id=req.session.userId; write(d); res.json({ok:true});
+});
+app.patch("/api/requests/:id",auth,(req,res)=>{
+ const d=read(),r=d.requests.find(x=>x.id===Number(req.params.id));
+ if(!r)return res.status(404).json({error:"Nicht gefunden"});
+ if(r.provider_id!==req.session.userId)return res.status(403).json({error:"Anfrage zuerst übernehmen."});
+ const allowed=["new","contacted","accepted","completed"];
+ if(!allowed.includes(req.body.status))return res.status(400).json({error:"Ungültiger Status."});
  r.status=req.body.status; write(d); res.json({ok:true});
 });
 app.get("/health",(req,res)=>res.json({ok:true,service:"AnfragePro"}));
