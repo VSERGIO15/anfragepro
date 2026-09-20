@@ -82,7 +82,7 @@ app.post("/api/register",async(req,res)=>{
  try{
   const {email,password,company}=req.body;
   if(!email||!password||!company||password.length<8)return res.status(400).json({error:"Firma, E-Mail und mindestens 8 Zeichen Passwort erforderlich."});
-  const emailNorm=email.toLowerCase();
+  const emailNorm=email.trim().toLowerCase();
   if(useDb){
    const exists=await pool.query("SELECT id FROM users WHERE email=$1",[emailNorm]);
    if(exists.rowCount)return res.status(400).json({error:"E-Mail bereits registriert."});
@@ -107,7 +107,8 @@ app.post("/api/login",async(req,res)=>{
   let u;
   if(useDb) u=(await pool.query("SELECT * FROM users WHERE email=$1",[email])).rows[0];
   else u=read().users.find(x=>x.email===email);
-  if(!u||!(await bcrypt.compare(req.body.password||"",u.password_hash)))return res.status(401).json({error:"Login-Daten nicht korrekt."});
+  const password=String(req.body.password||"");
+  if(!u||!u.password_hash||!(await bcrypt.compare(password,u.password_hash)))return res.status(401).json({error:"Login-Daten nicht korrekt."});
   req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));res.json({ok:true,company:u.company});
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler beim Login."});}
 });
