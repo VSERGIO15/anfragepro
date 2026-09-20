@@ -42,13 +42,12 @@ app.get("/api/me",auth,(req,res)=>{
  res.json({id:u.id,email:u.email,company:u.company});
 });
 app.get("/api/requests",auth,(req,res)=>{
- res.json(read().requests.filter(x=>x.user_id===req.session.userId).sort((a,b)=>b.id-a.id));
+ res.json(read().requests.sort((a,b)=>b.id-a.id));
 });
 app.post("/api/requests",upload.array("photos",8),(req,res)=>{
- const {user_id,service_type,service,place,date,scope,frequency,description,name,phone,email}=req.body;
- const d=read(),u=d.users.find(x=>x.id===Number(user_id));
- if(!u)return res.status(400).json({error:"Unternehmen nicht gefunden."});
- const r={id:Date.now(),user_id:u.id,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count:(req.files||[]).length,status:"new",created_at:new Date().toISOString()};
+ const {service_type,service,place,date,scope,frequency,description,name,phone,email}=req.body;
+ const d=read();
+ const r={id:Date.now(),user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count:(req.files||[]).length,status:"new",created_at:new Date().toISOString()};
  d.requests.push(r); write(d); res.json({ok:true,id:r.id});
 });
 app.patch("/api/requests/:id",auth,(req,res)=>{
