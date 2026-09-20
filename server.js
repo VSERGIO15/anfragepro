@@ -88,11 +88,13 @@ app.post("/api/register",async(req,res)=>{
    const id=Date.now();
    await pool.query("INSERT INTO users(id,email,password_hash,company,created_at) VALUES($1,$2,$3,$4,NOW())",[id,emailNorm,await bcrypt.hash(password,12),company]);
    req.session.userId=id;
+   await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
   }else{
    const d=read();
    if(d.users.some(u=>u.email===emailNorm))return res.status(400).json({error:"E-Mail bereits registriert."});
    const u={id:Date.now(),email:emailNorm,password_hash:await bcrypt.hash(password,12),company,created_at:new Date().toISOString(),phone:"",city:"",services:"",description:""};
    d.users.push(u);write(d);req.session.userId=u.id;
+   await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler bei der Registrierung."});}
@@ -105,7 +107,7 @@ app.post("/api/login",async(req,res)=>{
   if(useDb) u=(await pool.query("SELECT * FROM users WHERE email=$1",[email])).rows[0];
   else u=read().users.find(x=>x.email===email);
   if(!u||!(await bcrypt.compare(req.body.password||"",u.password_hash)))return res.status(401).json({error:"Login-Daten nicht korrekt."});
-  req.session.userId=u.id;res.json({ok:true,company:u.company});
+  req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));res.json({ok:true,company:u.company});
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler beim Login."});}
 });
 
