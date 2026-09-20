@@ -70,7 +70,7 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 <h1>Dienstleistungen einfach finden oder Aufträge erhalten.</h1>
 <p class="lead">AnfragePro verbindet Kunden mit Dienstleistern. Erstelle eine Anfrage oder verwalte neue Aufträge übersichtlich an einem Ort.</p>
 <div class="actions">
-<button class="choice primary" onclick="view('request')"><div class="icon">🔎</div><strong>Ich suche einen Dienstleister</strong><small>Anfrage kostenlos erstellen</small></button>
+<button type="button" class="choice primary" onclick="openCustomerRequest()"><div class="icon">🔎</div><strong>Ich suche einen Dienstleister</strong><small>Anfrage kostenlos erstellen</small></button>
 <a class="choice provider" href="#register" onclick="view('register');return false"><div class="icon">🏢</div><strong>Ich biete Dienstleistungen an</strong><small>Anfragen erhalten und verwalten</small></a>
 </div>
 </div>
@@ -97,7 +97,7 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 
 <section><div class="wrap"><div class="cta">
 <div><h2>Bereit für die erste Anfrage?</h2><p>Starte direkt als Kunde oder registriere dein Unternehmen.</p></div>
-<button onclick="view('request')">Anfrage erstellen</button>
+<button type="button" onclick="openCustomerRequest()">Anfrage erstellen</button>
 </div></div></section>
 </main>
 
@@ -126,6 +126,7 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 const $=id=>document.getElementById(id);
 function showHome(){$("home").classList.remove("hide");$("app").classList.add("hide");window.scrollTo({top:0,behavior:"smooth"})}
 function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash()}
+function openCustomerRequest(){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$("request").classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"})}
 async function api(url,opt={}){const r=await fetch(url,opt),d=await r.json();if(!r.ok)throw Error(d.error||"Fehler");return d}
 async function register(e){e.preventDefault();try{await api("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:$("rc").value,email:$("re").value,password:$("rp").value})});$("rmsg").textContent="Konto erstellt.";view("dash")}catch(x){$("rmsg").textContent=x.message}}
 async function login(e){e.preventDefault();try{await api("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("le").value,password:$("lp").value})});$("lmsg").textContent="Erfolgreich eingeloggt.";view("dash")}catch(x){$("lmsg").textContent=x.message}}
