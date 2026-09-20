@@ -151,6 +151,7 @@ app.get("/api/requests",auth,async(req,res)=>{
    me=d.users.find(x=>x.id===req.session.userId)||{};
    requests=d.requests.sort((a,b)=>b.id-a.id);
   }
+  requests=requests.filter(r=>!r.provider_id||Number(r.provider_id)===Number(req.session.userId));
   const city=String(me?.city||"").trim().toLowerCase();
   const services=String(me?.services||"").toLowerCase().split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
   const scored=requests.map(r=>{
@@ -162,7 +163,10 @@ app.get("/api/requests",auth,async(req,res)=>{
    if(services.some(s=>serviceType.includes(s)||service.includes(s)||s.includes(serviceType)||s.includes(service)))score+=1;
    return {...r,match_score:score,matched:score>0};
   }).sort((a,b)=>(b.match_score-a.match_score)||((b.id||0)-(a.id||0)));
-  res.json(scored);
+  res.json(scored.map(r=>{
+   if(r.provider_id&&Number(r.provider_id)===Number(req.session.userId)) return r;
+   return {...r,name:"",phone:"",email:""};
+  }));
  }catch(e){console.error(e);res.status(500).json({error:"Anfragen konnten nicht geladen werden."});}
 });
 
