@@ -103,7 +103,7 @@ app.post("/api/register",async(req,res)=>{
 
 app.post("/api/login",async(req,res)=>{
  try{
-  const email=(req.body.email||"").toLowerCase();
+  const email=(req.body.email||"").trim().toLowerCase();
   let u;
   if(useDb) u=(await pool.query("SELECT * FROM users WHERE email=$1",[email])).rows[0];
   else u=read().users.find(x=>x.email===email);
