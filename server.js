@@ -224,6 +224,6 @@ app.patch("/api/requests/:id",auth,async(req,res)=>{
 
 app.get("/health",(req,res)=>res.json({ok:true,service:"AnfragePro",database:useDb?"postgres":"json"}));
 
-app.get("/api/diagnose-login",async(req,res)=>{try{if(!useDb)return res.json({database:"json",users:read().users.length});const r=await pool.query("SELECT COUNT(*)::int AS count, MIN(email) AS first_email FROM users");res.json({database:"postgres",users:r.rows[0].count,has_users:r.rows[0].count>0});}catch(e){console.error(e);res.status(500).json({error:"Diagnose fehlgeschlagen."})}});
+
 
 dbInit().then(()=>app.listen(PORT,()=>console.log(`AnfragePro läuft auf http://localhost:${PORT} | DB: ${useDb?"Postgres":"JSON"}`))).catch(e=>{console.error("DB init failed",e);process.exit(1);});
