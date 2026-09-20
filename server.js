@@ -141,8 +141,28 @@ app.patch("/api/profile",auth,async(req,res)=>{
 
 app.get("/api/requests",auth,async(req,res)=>{
  try{
-  if(useDb) return res.json((await pool.query("SELECT * FROM requests ORDER BY id DESC")).rows);
-  res.json(read().requests.sort((a,b)=>b.id-a.id));
+  let me;
+  let requests;
+  if(useDb){
+   me=(await pool.query("SELECT city,services FROM users WHERE id=$1",[req.session.userId])).rows[0];
+   requests=(await pool.query("SELECT * FROM requests ORDER BY id DESC")).rows;
+  }else{
+   const d=read();
+   me=d.users.find(x=>x.id===req.session.userId)||{};
+   requests=d.requests.sort((a,b)=>b.id-a.id);
+  }
+  const city=String(me?.city||"").trim().toLowerCase();
+  const services=String(me?.services||"").toLowerCase().split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+  const scored=requests.map(r=>{
+   const place=String(r.place||"").toLowerCase();
+   const serviceType=String(r.service_type||"").toLowerCase();
+   const service=String(r.service||"").toLowerCase();
+   let score=0;
+   if(city && place && (place.includes(city)||city.includes(place)))score+=1;
+   if(services.some(s=>serviceType.includes(s)||service.includes(s)||s.includes(serviceType)||s.includes(service)))score+=1;
+   return {...r,match_score:score,matched:score>0};
+  }).sort((a,b)=>(b.match_score-a.match_score)||((b.id||0)-(a.id||0)));
+  res.json(scored);
  }catch(e){console.error(e);res.status(500).json({error:"Anfragen konnten nicht geladen werden."});}
 });
 
