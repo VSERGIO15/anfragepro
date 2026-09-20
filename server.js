@@ -8,6 +8,7 @@ const {Pool}=require("pg");
 const PgSession=require("connect-pg-simple")(session);
 
 const app=express(), PORT=process.env.PORT||3000;
+app.set("trust proxy",1);
 const DATA=path.join(__dirname,"data.json");
 const UPLOADS=path.join(__dirname,"uploads");
 if(!fs.existsSync(UPLOADS)) fs.mkdirSync(UPLOADS,{recursive:true});
@@ -70,7 +71,7 @@ app.use(session({
  secret:process.env.SESSION_SECRET||"change-this-secret",
  resave:false,saveUninitialized:false,
  store:useDb?new PgSession({pool,tableName:"user_sessions",createTableIfMissing:true}):undefined,
- cookie:{httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production"}
+ cookie:{httpOnly:true,sameSite:"lax",secure:true}
 }));
 app.use(express.static(path.join(__dirname,"public")));
 const upload=multer({dest:UPLOADS});
