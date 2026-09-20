@@ -105,7 +105,7 @@ app.post("/api/login",async(req,res)=>{
  try{
   const email=(req.body.email||"").trim().toLowerCase();
   let u;
-  if(useDb) u=(await pool.query("SELECT * FROM users WHERE email=$1",[email])).rows[0];
+  if(useDb) u=(await pool.query("SELECT * FROM users WHERE LOWER(TRIM(email))=$1",[email])).rows[0];
   else u=read().users.find(x=>x.email===email);
   const password=String(req.body.password||"");
   if(!u)return res.status(401).json({error:"E-Mail nicht gefunden."});
