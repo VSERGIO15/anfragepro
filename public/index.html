@@ -440,6 +440,11 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-photo-tile.garden{background-image:url('https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=700&q=85')}
 @media(max-width:850px){.pro-hero-grid{grid-template-columns:1fr!important}.pro-hero-art{min-height:430px!important}.pro-photo-grid{grid-template-columns:1fr 1fr}.pro-photo-tile.clean{grid-column:1/-1}}
 @media(max-width:650px){.pro-hero-art{min-height:390px!important;border-radius:24px!important}.pro-photo-copy{left:17px;bottom:17px}.pro-photo-copy strong{font-size:19px}.pro-photo-match{right:14px;bottom:14px}.pro-photo-section-head{display:block}.pro-photo-section-head p{margin-top:9px}.pro-photo-grid{grid-template-columns:1fr 1fr}.pro-photo-tile{height:165px;border-radius:17px}.pro-photo-tile.clean{grid-column:1/-1;height:200px}}
+
+/* Header CTA polish */
+.pro-header-cta{display:inline-flex;align-items:center;gap:7px;background:#ffb703;color:#142033!important;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:900;box-shadow:0 8px 20px #14203312;transition:.18s}
+.pro-header-cta b{font-size:16px}.pro-header-cta:hover{transform:translateY(-2px);box-shadow:0 12px 25px #14203318}
+@media(max-width:650px){.pro-header-cta{display:none}}
 </style></head>
 <body>
 <div id="home">
@@ -448,6 +453,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 <nav class="pro-navlinks">
 <a href="#how" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'});return false">So funktioniert's</a>
 <a href="#for-providers" onclick="document.getElementById('for-providers').scrollIntoView({behavior:'smooth'});return false">Für Dienstleister</a>
+<a class="pro-header-cta" href="#" onclick="openCustomerRequest();return false">Anfrage erstellen <b>↗</b></a>
 <button class="pro-login" onclick="view('login')">Einloggen</button>
 </nav>
 </div></header>
