@@ -465,6 +465,20 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 /* Tighten spacing below photo gallery */
 .pro-client-flow{padding-top:34px!important}
 @media(max-width:800px){.pro-client-flow{padding-top:28px!important}}
+
+/* Mobile hero layout — compact headline, photo immediately below benefits */
+@media(max-width:650px){
+  #home .pro-hero{padding-top:20px!important;padding-bottom:18px!important}
+  #home .pro-hero-grid{display:flex!important;flex-direction:column!important;gap:14px!important}
+  #home .pro-hero-copy{order:1!important}
+  #home .pro-hero-art{order:2!important;width:100%!important;min-height:365px!important;margin-top:2px!important}
+  #home h1{font-size:48px!important;line-height:1.02!important;letter-spacing:-2.2px!important;margin-bottom:14px!important}
+  #home .lead{font-size:17px!important;line-height:1.48!important;margin-bottom:18px!important}
+  #home .pro-hero-actions{gap:10px!important;margin-top:0!important}
+  #home .pro-hero-actions>*{min-height:64px!important}
+  #home .pro-trustline{margin-top:14px!important;gap:10px!important;line-height:1.35!important}
+  #home .pro-photo-badge{top:18px!important;left:18px!important}
+}
 </style></head>
 <body>
 <div id="home">
