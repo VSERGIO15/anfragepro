@@ -452,6 +452,12 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-live-head>div>span{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#667085}.pro-live-head h2{margin:8px 0 0;font-size:clamp(30px,4vw,42px);letter-spacing:-1.5px}.pro-live-head p{max-width:390px;margin:0;color:#667085;line-height:1.5;font-size:14px}
 .pro-live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.pro-live-card{background:#fff;border:1px solid #e2e7ee;border-radius:22px;padding:20px;box-shadow:0 12px 30px #14203308;transition:.18s}.pro-live-card:hover{transform:translateY(-3px);box-shadow:0 18px 38px #14203312}.pro-live-top{display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:900;letter-spacing:1px;color:#667085}.pro-live-top i{font-style:normal;color:#157347;background:#e6f8ef;border-radius:999px;padding:5px 8px}.pro-live-card h3{font-size:20px;letter-spacing:-.5px;margin:24px 0 8px}.pro-live-card p{color:#667085;line-height:1.5;font-size:14px;min-height:43px}.pro-live-card>div:last-child{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.pro-live-card>div:last-child span{font-size:11px;font-weight:800;color:#475467;background:#f5f7fa;border-radius:999px;padding:7px 9px}
 @media(max-width:800px){.pro-live-head{display:block}.pro-live-head p{margin-top:9px}.pro-live-grid{grid-template-columns:1fr}.pro-live-card h3{margin-top:18px}.pro-live-card p{min-height:0}}
+
+/* Customer flow section */
+.pro-client-flow{padding:68px 0;background:#fff;border-top:1px solid #e5e9ef;border-bottom:1px solid #e5e9ef}
+.pro-client-head{display:grid;grid-template-columns:1fr 1fr;column-gap:60px;align-items:end;margin-bottom:30px}.pro-client-head>span{grid-column:1/-1;font-size:10px;font-weight:900;letter-spacing:1.5px;color:#667085;margin-bottom:9px}.pro-client-head h2{margin:0;font-size:clamp(32px,4.5vw,48px);line-height:1;letter-spacing:-2px}.pro-client-head h2 i{font-style:normal;color:#d97706}.pro-client-head p{margin:0;color:#667085;line-height:1.55;max-width:460px}
+.pro-client-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.pro-client-step{position:relative;background:#f7f9fb;border:1px solid #e3e8ee;border-radius:24px;padding:22px;min-height:235px;transition:.18s}.pro-client-step:hover{transform:translateY(-3px);box-shadow:0 18px 38px #14203310}.pro-client-step.active{background:#142033;color:#fff;border-color:#142033;box-shadow:0 20px 45px #14203318}.pcs-num{font-size:11px;font-weight:900;letter-spacing:1px;color:#98a2b3}.active .pcs-num{color:#ffcf57}.pcs-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#ffb703;color:#142033;font-size:21px;font-weight:900;margin:28px 0 18px}.pro-client-step h3{font-size:19px;letter-spacing:-.4px;margin:0 0 8px}.pro-client-step p{font-size:13px;line-height:1.5;color:#667085;margin:0}.pro-client-step.active p{color:#b8c4d4}
+@media(max-width:800px){.pro-client-flow{padding:52px 0}.pro-client-head{display:block;margin-bottom:22px}.pro-client-head p{margin-top:12px}.pro-client-steps{grid-template-columns:1fr}.pro-client-step{min-height:0}.pcs-icon{margin:20px 0 15px}}
 </style></head>
 <body>
 <div id="home">
@@ -519,6 +525,15 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 <div class="pro-category-card"><i>→</i><b>Weitere Leistungen</b><span>Deine Anfrage · dein Bedarf</span></div>
 </div>
 <div class="pro-security"><div><strong>Einfach. Direkt. Transparent.</strong><p>AnfragePro zeigt dir klar, was als Nächstes passiert.</p></div><div class="pro-security-badges"><span>✓ Kostenlose Anfrage</span><span>✓ Lokale Suche</span><span>✓ Direkter Kontakt</span></div></div>
+</div></section>
+
+<section class="pro-client-flow"><div class="wrap">
+<div class="pro-client-head"><span>FÜR KUNDEN</span><h2>Von der Anfrage<br><i>direkt zum Kontakt.</i></h2><p>Du musst nicht lange suchen. Beschreibe deinen Auftrag und AnfragePro bringt die nächsten Schritte in eine klare Reihenfolge.</p></div>
+<div class="pro-client-steps">
+<div class="pro-client-step"><div class="pcs-num">01</div><div class="pcs-icon">↗</div><h3>Anfrage erstellen</h3><p>Leistung, Ort, Termin und wichtige Details in wenigen Schritten angeben.</p></div>
+<div class="pro-client-step active"><div class="pcs-num">02</div><div class="pcs-icon">✦</div><h3>Passenden Dienstleister finden</h3><p>Deine Anfrage wird für Dienstleister mit passenden Profilen sichtbar.</p></div>
+<div class="pro-client-step"><div class="pcs-num">03</div><div class="pcs-icon">→</div><h3>Direkt Kontakt aufnehmen</h3><p>Wird die Anfrage übernommen, werden die Kontaktdaten sichtbar.</p></div>
+</div>
 </div></section>
 
 <section id="how" class="pro-how"><div class="wrap">
