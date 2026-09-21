@@ -65,6 +65,51 @@ textarea{min-height:110px}
 button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
 .secondary{background:#fff;color:var(--ink);border:1px solid #d1d5db}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.muted{color:var(--muted)}.hide{display:none}.tabs{display:flex;gap:8px;flex-wrap:wrap}.req{border:1px solid var(--line);padding:15px;border-radius:11px;margin:10px 0}
+/* AnfragePro signature design */
+:root{--ink:#142033;--muted:#667085;--line:#e5e9ef;--bg:#f4f6f9;--card:#fff;--accent:#142033;--brand:#ffb703;--brand2:#ffd166;--mint:#dff7ed}
+body{background:var(--bg)}
+#home{position:relative;overflow:hidden}
+#home:after{content:"";position:absolute;z-index:-1;right:-140px;top:150px;width:360px;height:360px;border-radius:42% 58% 61% 39%;background:#ffd16633;transform:rotate(18deg)}
+#home .hero{padding-top:38px}
+#home .hero-grid{gap:56px}
+#home h1{font-size:clamp(44px,5.6vw,72px);line-height:.98;letter-spacing:-3.4px}
+#home h1 em{display:inline-block;color:#d97706;position:relative}
+#home h1 em:after{content:"";position:absolute;left:0;right:8%;bottom:-4px;height:7px;background:var(--brand);border-radius:99px;transform:rotate(-1deg);opacity:.85}
+#home .lead{max-width:600px}
+.signature-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.signature-action{position:relative;min-height:126px;padding:20px;border-radius:24px;border:1px solid #dfe5ec;background:#fff;text-align:left;box-shadow:0 14px 34px #1420330b}
+.signature-action.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.signature-action .sa-icon{font-size:25px;margin-bottom:18px}
+.signature-action strong{display:block;font-size:17px;letter-spacing:-.2px}
+.signature-action small{display:block;margin-top:6px;opacity:.72;font-size:13px}
+.signature-action .sa-arrow{position:absolute;right:17px;bottom:15px;font-size:22px;color:var(--brand)}
+.flow-orbit{background:#fff;border:1px solid #e1e6ed;border-radius:32px;padding:24px;box-shadow:0 28px 70px #14203316;position:relative}
+.flow-orbit .orbit-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.flow-orbit .orbit-title strong{font-size:20px}
+.flow-line{position:absolute;left:38px;top:83px;bottom:40px;width:2px;background:linear-gradient(var(--brand),#dff7ed)}
+.flow-step{position:relative;display:flex;gap:15px;align-items:flex-start;padding:10px 0}
+.flow-dot{width:34px;height:34px;display:grid;place-items:center;border-radius:12px;background:var(--brand);font-weight:900;z-index:1;flex:none}
+.flow-step:nth-of-type(3) .flow-dot{background:#e6f8ef}
+.flow-step:nth-of-type(4) .flow-dot{background:var(--ink);color:#fff}
+.flow-step b{display:block;margin-bottom:3px}
+.flow-step span{font-size:13px;color:var(--muted)}
+.signature-strip{display:flex;gap:10px;align-items:center;margin-top:20px;color:var(--muted);font-size:13px}
+.signature-strip span{padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+#request{position:relative;overflow:hidden}
+#request:after{content:"";position:absolute;right:-80px;top:-90px;width:230px;height:230px;border-radius:50%;background:#ffd16638;pointer-events:none}
+#request h2{position:relative;z-index:1}
+#request form{position:relative;z-index:1}
+#request .grid>div{position:relative}
+#request .grid>div:before{content:"";position:absolute;left:-8px;top:8px;width:4px;height:4px;border-radius:50%;background:var(--brand);opacity:.9}
+#request #rnotice,#request #customerStatus{position:relative;z-index:1}
+@media(max-width:650px){
+ .signature-actions{grid-template-columns:1fr}
+ .signature-action{min-height:108px}
+ #home .hero{padding-top:20px}
+ #home h1{font-size:44px;letter-spacing:-2.3px}
+ .flow-orbit{padding:20px;border-radius:25px}
+ .flow-line{left:36px;top:78px;bottom:38px}
+}
 @media(max-width:800px){.hero-grid{grid-template-columns:1fr}.features{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.navlinks{display:none}.cta{display:block}.cta button{margin-top:20px}}
 @media(max-width:650px){.hero-card h3{font-size:18px}.hero-card p{font-size:14px}.flow-item{font-size:14px}.flow-item .muted{font-size:13px}.grid{grid-template-columns:1fr}.full{grid-column:auto}h1{letter-spacing:-2px;font-size:43px}.hero{padding-top:20px}.hero-grid{gap:22px}.hero-card{border-radius:22px;padding:18px}.cta{padding:28px;border-radius:22px}.section-title{text-align:left}.section-lead{text-align:left}}
 </style>
@@ -82,10 +127,11 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 <div class="badge">Einfach. Direkt. AnfragePro.</div>
 <h1>Dein Auftrag.<br><em>Der passende</em> Dienstleister.</h1>
 <p class="lead">AnfragePro bringt Menschen und lokale Dienstleister direkt zusammen – einfach, schnell und ohne unnötiges Hin und Her.</p>
-<div class="actions">
-<button type="button" class="choice primary" onclick="openCustomerRequest()"><div class="icon">🔎</div><strong>Ich suche einen Dienstleister</strong><small>Anfrage kostenlos erstellen</small></button>
-<a class="choice provider" href="#register" onclick="view('register');return false"><div class="icon">🏢</div><strong>Ich biete Dienstleistungen an</strong><small>Anfragen erhalten und verwalten</small></a>
+<div class="signature-actions">
+<button type="button" class="signature-action primary" onclick="openCustomerRequest()"><div class="sa-icon">⌁</div><strong>Ich suche einen Dienstleister</strong><small>Anfrage kostenlos erstellen</small><span class="sa-arrow">→</span></button>
+<a class="signature-action" href="#register" onclick="view('register');return false"><div class="sa-icon">✦</div><strong>Ich biete Dienstleistungen an</strong><small>Anfragen erhalten und verwalten</small><span class="sa-arrow">→</span></a>
 </div>
+<div class="signature-strip"><span>● kostenlos</span><span>● lokal</span><span>● direkt</span></div>
 </div>
 <div class="hero-card">
 <h3>So funktioniert AnfragePro</h3>
