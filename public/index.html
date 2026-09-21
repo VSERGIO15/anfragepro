@@ -440,7 +440,10 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-photo-tile.garden{background-image:url('https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=700&q=85')}
 @media(max-width:850px){.pro-hero-grid{grid-template-columns:1fr!important}.pro-hero-art{min-height:430px!important}.pro-photo-grid{grid-template-columns:1fr 1fr}.pro-photo-tile.clean{grid-column:1/-1}}
 @media(max-width:650px){.pro-hero-art{min-height:390px!important;border-radius:24px!important}.pro-photo-copy{left:17px;bottom:17px}.pro-photo-copy strong{font-size:19px}.pro-photo-match{right:14px;bottom:14px}.pro-photo-section-head{display:block}.pro-photo-section-head p{margin-top:9px}.pro-photo-grid{grid-template-columns:1fr 1fr}.pro-photo-tile{height:165px;border-radius:17px}.pro-photo-tile.clean{grid-column:1/-1;height:200px}}
-</style></head>
+<style>
+.pro-photo-main{transition:opacity .35s ease,transform .35s ease}
+.pro-photo-main.photo-fade{opacity:.15;transform:scale(1.015)}
+</style></style></head>
 <body>
 <div id="home">
 <header class="pro-header"><div class="wrap pro-nav">
@@ -566,5 +569,29 @@ async function setStatus(id,status){try{await api("/api/requests/"+id,{method:"P
 function norm(x){return String(x||"").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")}
 async function loadDash(){try{const me=await api("/api/me");$("who").textContent=me.company+" · "+me.email;$("pc").value=me.company;$("pp").value=me.phone||"";$("pcity").value=me.city||"";$("pservices").value=me.services||"";$("pdesc").value=me.description||"";const rs=await api("/api/requests");const newRequests=rs.filter(r=>String(r.status||"").toLowerCase()==="new");const badge=$("newCount");if(newRequests.length){badge.textContent=`🔔 ${newRequests.length} neue Anfrage${newRequests.length===1?"":"n"} – bitte prüfen`;badge.style.display="inline-block";badge.style.background="#dc2626";badge.style.padding="6px 12px"}else{badge.textContent="";badge.style.display="none"}const city=norm(me.city);const services=norm(me.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);$("requests").innerHTML=rs.length?rs.map(r=>{const assigned=Number(r.provider_id)===Number(me.id);const place=norm(r.place),serviceType=norm(r.service_type),service=norm(r.service);const reasons=[];if(city&&place&&(place.includes(city)||city.includes(place)))reasons.push("Ort passt");if(services.some(s=>s&&(serviceType.includes(s)||service.includes(s)||s.includes(serviceType)||s.includes(service))))reasons.push("Leistung passt");const matched=!!r.matched||reasons.length>0;const match=matched?`<div style="display:inline-block;margin:8px 0 4px;padding:5px 9px;border-radius:999px;background:#eef2f7;font-size:12px;font-weight:700">✓ Passend zu deinem Profil${reasons.length?` · ${reasons.join(" · ")}`:""}</div>`:"";return `<div class="req"><b>${r.service_type} · ${r.service}</b>${match}<br>📍 ${r.place||"—"} · 📅 ${r.date||"—"} · 📷 ${r.photo_count}<br><b>${r.name}</b> · ${r.phone} · ${r.email}<br>${r.description||""}<br><small>Status: ${r.status}</small><br>${assigned?`<label>Status ändern</label> <select onchange="setStatus(${r.id},this.value)"><option value="new" ${r.status==="new"?"selected":""}>Neu</option><option value="contacted" ${r.status==="contacted"?"selected":""}>Kontakt aufgenommen</option><option value="accepted" ${r.status==="accepted"?"selected":""}>Auftrag angenommen</option><option value="completed" ${r.status==="completed"?"selected":""}>Abgeschlossen</option></select>`:r.provider_id?`<small>Anfrage bereits von einem anderen Dienstleister übernommen.</small>`:`<button onclick="claimRequest(${r.id})">Anfrage übernehmen</button>`}</div>`}).join(""):"Noch keine Anfragen."}catch(x){$("requests").innerHTML="<p>Bitte zuerst einloggen.</p>"}}
 </script>
-</body>
+<script>
+const apHeroPhotos=[
+ {image:"https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85",service:"Fensterreinigung",meta:"Gifhorn · einmalig · passender Dienstleister"},
+ {image:"https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=85",service:"Reinigung",meta:"Gifhorn · zuverlässig · lokal"},
+ {image:"https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1200&q=85",service:"Handwerk",meta:"Gifhorn · Reparatur · passend"},
+ {image:"https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=1200&q=85",service:"Gartenpflege",meta:"Gifhorn · Außenbereich · lokal"}
+];
+let apPhotoIndex=0;
+function rotateApHeroPhoto(){
+ const art=document.querySelector(".pro-photo-main");
+ const title=document.querySelector(".pro-photo-copy strong");
+ const meta=document.querySelector(".pro-photo-copy span");
+ if(!art||!title||!meta)return;
+ art.classList.add("photo-fade");
+ setTimeout(()=>{
+  apPhotoIndex=(apPhotoIndex+1)%apHeroPhotos.length;
+  const p=apHeroPhotos[apPhotoIndex];
+  art.style.backgroundImage="linear-gradient(180deg,rgba(14,49,95,.03),rgba(14,49,95,.48)),url('"+p.image+"')";
+  title.textContent=p.service;
+  meta.textContent=p.meta;
+  art.classList.remove("photo-fade");
+ },300);
+}
+setInterval(rotateApHeroPhoto,5000);
+</script></body>
 </html>
