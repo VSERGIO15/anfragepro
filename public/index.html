@@ -274,59 +274,114 @@ body{background:var(--trust-bg)}
 .cta button{background:#fff;color:var(--trust-dark)}
 @media(max-width:650px){.hero-new-grid{background:linear-gradient(150deg,#0b2f68,#174ea6)}}
 </style>
-</head>
+<style>
+/* AnfragePro V3 — professional editorial identity */
+:root{--p-ink:#17212b;--p-dark:#102c2b;--p-teal:#0f766e;--p-teal2:#168a7f;--p-mint:#dff3ed;--p-cream:#f5f4ef;--p-paper:#fbfaf7;--p-line:#dfe5e1;--p-muted:#68756f;--p-white:#fff}
+body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-serif}
+.pro-header{padding:22px 0;background:var(--p-cream)}
+.pro-nav{display:flex;align-items:center;justify-content:space-between}
+.pro-logo{font-size:24px;font-weight:900;letter-spacing:-1.1px;display:flex;align-items:center;gap:9px}
+.pro-logo span{width:32px;height:32px;border-radius:10px;background:var(--p-dark);color:#dff3ed;display:grid;place-items:center;font-size:16px}
+.pro-navlinks{display:flex;gap:27px;align-items:center;font-size:13px;font-weight:750}
+.pro-navlinks>a{color:#56645e}
+.pro-login{background:transparent;border:1px solid #cfd8d3;color:var(--p-ink);padding:10px 16px;border-radius:12px}
+.pro-hero{padding:56px 0 0}
+.pro-kicker{font-size:10px;letter-spacing:1.7px;font-weight:900;color:var(--p-teal);display:flex;align-items:center;gap:8px}
+.pro-kicker span{width:7px;height:7px;background:#49a88f;border-radius:50%;box-shadow:0 0 0 5px #49a88f1c}
+.pro-hero-grid{display:grid;grid-template-columns:1.03fr .97fr;gap:70px;align-items:center;margin-top:25px}
+.pro-hero h1{font-size:clamp(52px,6.5vw,84px);line-height:.93;letter-spacing:-4.5px;margin:0 0 24px;color:var(--p-dark)}
+.pro-hero h1 i,.pro-section-intro h2 i,.pro-provider-section h2 i{font-style:normal;color:var(--p-teal)}
+.pro-hero-copy>p{font-size:18px;line-height:1.6;color:var(--p-muted);max-width:600px;margin:0 0 28px}
+.pro-hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.pro-main-btn,.pro-provider-btn,.pro-dark-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:30px;text-decoration:none;font-weight:850;font-family:inherit;border-radius:14px;padding:15px 18px;cursor:pointer}
+.pro-main-btn{background:var(--p-dark);color:#fff;border:1px solid var(--p-dark);min-width:220px}
+.pro-main-btn b{color:#9de1d0;font-size:20px}.pro-provider-btn{background:#fff;color:var(--p-dark);border:1px solid #d5ddd8;min-width:220px}.pro-provider-btn b{color:var(--p-teal);font-size:19px}
+.pro-trustline{display:flex;gap:17px;flex-wrap:wrap;margin-top:18px;color:#718079;font-size:11px;font-weight:750}
+.pro-hero-art{background:#e4eee9;border-radius:34px;padding:27px;min-height:455px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.pro-hero-art:before{content:"";position:absolute;width:370px;height:370px;border-radius:50%;background:#b9ded133;right:-110px;top:-110px}
+.pro-hero-art:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;background:#fff8;left:-130px;bottom:-130px}
+.pro-art-label{position:absolute;top:24px;left:27px;font-size:9px;font-weight:900;letter-spacing:1.5px;color:#6c7d75}
+.pro-request-card,.pro-provider-card{background:#fff;border:1px solid #e1e8e4;border-radius:21px;padding:19px;display:flex;align-items:center;gap:13px;position:relative;z-index:1;box-shadow:0 20px 40px #193b3220}
+.pro-request-card{transform:translateX(9px)}
+.pro-provider-card{transform:translateX(-9px)}
+.pro-mini-icon,.pro-avatar{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;font-weight:900;font-size:21px}
+.pro-mini-icon{background:var(--p-mint);color:var(--p-teal)}.pro-avatar{background:var(--p-dark);color:#dff3ed}
+.pro-request-card small,.pro-provider-card small{display:block;font-size:8px;letter-spacing:1px;font-weight:900;color:#89968f}.pro-request-card strong,.pro-provider-card strong{display:block;font-size:16px;margin:3px 0}.pro-request-card span,.pro-provider-card span{font-size:11px;color:#718079}.pro-request-card em{margin-left:auto;color:var(--p-teal);font-style:normal;font-size:21px}
+.pro-provider-card span i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#2ca67e;margin-right:4px}
+.pro-connector{height:54px;display:flex;align-items:center;justify-content:center;gap:10px;position:relative;z-index:2}.pro-connector span{width:48px;height:1px;background:#9bb8ae}.pro-connector b{font-size:9px;letter-spacing:1.3px;color:var(--p-teal);background:#e4eee9;padding:5px 7px}
+.pro-art-foot{position:absolute;bottom:23px;left:27px;right:27px;border-top:1px solid #b9cec6;padding-top:13px;color:#70817a;font-size:10px;display:flex;gap:8px;align-items:center}.pro-art-foot span{color:var(--p-dark);font-weight:900;margin-left:8px}
+.pro-marquee{border-top:1px solid var(--p-line);border-bottom:1px solid var(--p-line);margin-top:55px;background:#fff}.pro-marquee .wrap{display:flex;justify-content:space-between;align-items:center;padding-top:14px;padding-bottom:14px;color:#738079;font-size:9px;font-weight:900;letter-spacing:1.8px}.pro-marquee i{font-style:normal;color:#62a895}
+.pro-how{padding:105px 0}
+.pro-section-intro{display:grid;grid-template-columns:.6fr 1fr 1fr;gap:35px;align-items:end}.pro-section-intro>span,.pro-overline{font-size:10px;letter-spacing:1.5px;font-weight:900;color:var(--p-teal)}.pro-section-intro h2{font-size:46px;line-height:.98;letter-spacing:-2.5px;margin:0;color:var(--p-dark)}.pro-section-intro p{color:var(--p-muted);line-height:1.6;max-width:380px;margin:0}
+.pro-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#cfd9d4;margin-top:55px;border:1px solid #cfd9d4}.pro-step{background:var(--p-paper);padding:28px;min-height:250px;position:relative}.pro-step>b{font-size:10px;color:#809088}.step-icon{width:46px;height:46px;border-radius:14px;background:var(--p-mint);color:var(--p-teal);display:grid;place-items:center;font-weight:900;font-size:20px;margin:35px 0 18px}.pro-step h3{font-size:20px;letter-spacing:-.5px;margin:0 0 8px}.pro-step p{color:var(--p-muted);line-height:1.5;font-size:14px;margin:0;max-width:300px}
+.pro-provider-section{background:var(--p-dark);color:#fff;padding:90px 0}.pro-provider-inner{display:grid;grid-template-columns:1fr .85fr;gap:80px;align-items:center}.pro-provider-section h2{font-size:53px;line-height:.98;letter-spacing:-3px;margin:16px 0 20px}.pro-provider-section h2 i{color:#9de1d0}.pro-provider-section p{color:#b9c9c4;line-height:1.6;max-width:520px;margin-bottom:28px}.pro-dark-btn{background:#dff3ed;color:var(--p-dark);border:0}.pro-dark-btn b{color:var(--p-teal);font-size:19px}
+.pro-dashboard-preview{background:#f7faf8;color:var(--p-dark);border-radius:25px;padding:22px;box-shadow:0 30px 60px #0004}.preview-top{display:flex;justify-content:space-between;font-size:8px;font-weight:900;letter-spacing:1.3px;color:#7a8983}.preview-top i{font-style:normal;color:#27a276}.preview-count{display:flex;justify-content:space-between;align-items:center;margin:28px 0 15px;font-size:19px}.preview-count span{background:#eaf5f0;color:var(--p-teal);padding:6px 10px;border-radius:10px;font-weight:900}.preview-match{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e0e8e3;border-radius:17px;padding:15px}.preview-match>span{width:34px;height:34px;border-radius:10px;background:var(--p-mint);color:var(--p-teal);display:grid;place-items:center;font-weight:900}.preview-match b,.preview-match small{display:block}.preview-match small{color:#718079;margin-top:4px;font-size:10px}.preview-match em{margin-left:auto;font-style:normal;color:var(--p-teal)}.preview-line{height:1px;background:#e0e8e3;margin:22px 0}.preview-status{display:flex;justify-content:space-between;font-size:10px;color:#718079}.preview-status b{color:var(--p-teal)}
+.pro-final{padding:75px 0}.pro-final-card{background:#e8f1ed;border-radius:30px;padding:45px 48px;display:flex;justify-content:space-between;align-items:center;gap:30px}.pro-final-card>div>span{font-size:9px;letter-spacing:1.6px;font-weight:900;color:var(--p-teal)}.pro-final-card h2{font-size:39px;line-height:1;letter-spacing:-2px;margin:13px 0 0;color:var(--p-dark)}.pro-final-card button{background:var(--p-dark);color:#fff;border-radius:14px;padding:15px 19px;white-space:nowrap}.pro-final-card button b{color:#9de1d0;font-size:18px}
+.pro-footer{padding:28px 0 40px;color:#78847f;font-size:11px}.pro-footer .wrap{display:flex;justify-content:space-between;border-top:1px solid var(--p-line);padding-top:20px}.pro-footer div{display:flex;gap:20px}
+@media(max-width:850px){.pro-navlinks>a{display:none}.pro-hero-grid,.pro-provider-inner{grid-template-columns:1fr;gap:35px}.pro-section-intro{grid-template-columns:1fr;gap:14px}.pro-steps{grid-template-columns:1fr}.pro-step{min-height:0}.pro-provider-section h2{font-size:45px}.pro-final-card{display:block}.pro-final-card button{margin-top:24px}.pro-hero{padding-top:35px}}
+@media(max-width:650px){.pro-nav{padding:0 18px}.pro-header{padding:17px 0}.pro-login{padding:9px 12px}.pro-hero{padding-top:25px}.pro-hero-grid{margin-top:19px}.pro-hero h1{font-size:50px;letter-spacing:-3px}.pro-hero-copy>p{font-size:16px}.pro-hero-actions{display:grid;grid-template-columns:1fr}.pro-main-btn,.pro-provider-btn{width:100%}.pro-trustline{display:block;line-height:2}.pro-trustline span{margin-right:10px}.pro-hero-art{min-height:360px;padding:18px;border-radius:25px}.pro-request-card,.pro-provider-card{padding:15px}.pro-request-card{transform:none}.pro-provider-card{transform:none}.pro-art-label{left:18px}.pro-art-foot{left:18px;right:18px}.pro-marquee{margin-top:35px}.pro-marquee .wrap{overflow:hidden;gap:15px;justify-content:flex-start;white-space:nowrap}.pro-marquee .wrap span:nth-last-of-type(1){display:none}.pro-how{padding:70px 0}.pro-section-intro h2{font-size:38px}.pro-steps{margin-top:35px}.pro-provider-section{padding:70px 0}.pro-provider-section h2{font-size:40px}.pro-final{padding:55px 0}.pro-final-card{padding:30px 24px}.pro-final-card h2{font-size:31px}.pro-footer .wrap{padding-left:22px;padding-right:22px}}
+</style></head>
 <body>
 <div id="home">
-<header><div class="wrap nav">
-<a class="logo" href="#" onclick="showHome();return false">Anfrage<span>Pro</span></a>
-<div class="navlinks"><button onclick="view('login')">Einloggen</button><button class="secondary" onclick="view('register')">Für Dienstleister</button></div>
+<header class="pro-header"><div class="wrap pro-nav">
+<a class="pro-logo" href="#" onclick="showHome();return false"><span>✦</span> AnfragePro</a>
+<nav class="pro-navlinks">
+<a href="#how" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'});return false">So funktioniert's</a>
+<a href="#for-providers" onclick="document.getElementById('for-providers').scrollIntoView({behavior:'smooth'});return false">Für Dienstleister</a>
+<button class="pro-login" onclick="view('login')">Einloggen</button>
+</nav>
 </div></header>
-
 <main>
-<section class="hero hero-new"><div class="wrap">
-<div class="hero-topline"><span>✦ ANFRAGEPRO</span><span>LOKAL. DIREKT. EINFACH.</span></div>
-<div class="hero-new-grid">
-<div class="hero-copy">
-<div class="live-pill"><i></i> DIE NEUE ART, DIENSTLEISTER ZU FINDEN</div>
-<h1>Dein Auftrag.<br><span>Dein Match.</span></h1>
-<p class="lead">Eine Anfrage. Passende Dienstleister. Direkter Kontakt. <b>Ohne Umwege.</b></p>
-<div class="signature-actions">
-<button type="button" class="signature-action primary" onclick="openCustomerRequest()"><div class="sa-icon">↗</div><strong>Ich suche Hilfe</strong><small>Anfrage in wenigen Minuten erstellen</small><span class="sa-arrow">→</span></button>
-<a class="signature-action" href="#register" onclick="view('register');return false"><div class="sa-icon">✦</div><strong>Ich bin Dienstleister</strong><small>Neue Aufträge in deiner Region</small><span class="sa-arrow">→</span></a>
+<section class="pro-hero">
+<div class="wrap">
+<div class="pro-kicker"><span></span> DIENSTLEISTUNGEN. NEU GEDACHT.</div>
+<div class="pro-hero-grid">
+<div class="pro-hero-copy">
+<h1>Was brauchst du?<br><i>Wir finden den Weg.</i></h1>
+<p>Beschreibe deinen Auftrag einmal. AnfragePro bringt deine Anfrage mit passenden Dienstleistern in deiner Nähe zusammen.</p>
+<div class="pro-hero-actions">
+<button class="pro-main-btn" onclick="openCustomerRequest()">Anfrage erstellen <b>↗</b></button>
+<a class="pro-provider-btn" href="#register" onclick="view('register');return false">Ich bin Dienstleister <b>→</b></a>
 </div>
-<div class="hero-micro"><span>✓ kostenlos starten</span><span>✓ keine Registrierung für Kunden</span></div>
+<div class="pro-trustline"><span>✓ Kostenlos für Kunden</span><span>✓ Lokal</span><span>✓ Direkt zum Kontakt</span></div>
 </div>
-<div class="hero-visual">
-<div class="visual-glow"></div>
-<div class="match-card">
-<div class="match-head"><span>LIVE MATCH</span><b>● ONLINE</b></div>
-<div class="match-main"><div class="match-icon">⌂</div><div><small>DEINE ANFRAGE</small><strong>Fensterreinigung</strong><span>📍 Gifhorn · einmalig</span></div></div>
-<div class="match-divider"></div>
-<div class="match-person"><div class="avatar">✦</div><div><small>PASSENDER DIENSTLEISTER</small><strong>In deiner Nähe gefunden</strong><span>✓ Ort passt &nbsp; ✓ Leistung passt</span></div><em>→</em></div>
+<div class="pro-hero-art">
+<div class="pro-art-label">DEIN AUFTRAG</div>
+<div class="pro-request-card">
+<div class="pro-mini-icon">⌁</div><div><small>ANFRAGE</small><strong>Fensterreinigung</strong><span>Gifhorn · einmalig</span></div><em>✓</em>
 </div>
-<div class="floating-note note-one"><b>01</b><span>Anfrage<br>erstellen</span></div>
-<div class="floating-note note-two"><b>02</b><span>Match<br>erhalten</span></div>
-<div class="hero-orbit">✦</div>
+<div class="pro-connector"><span></span><b>PASSEND</b><span></span></div>
+<div class="pro-provider-card">
+<div class="pro-avatar">✦</div><div><small>DIENSTLEISTER</small><strong>In deiner Nähe</strong><span><i></i> Ort & Leistung passen</span></div>
+</div>
+<div class="pro-art-foot"><span>01</span> Anfrage <span>02</span> Matching <span>03</span> Kontakt</div>
 </div>
 </div>
-<div class="hero-bottom"><div><b>01</b><span>Anfrage</span></div><div><b>02</b><span>Matching</span></div><div><b>03</b><span>Kontakt</span></div><div><b>04</b><span>Auftrag</span></div></div>
+</div>
+</section>
+
+<section class="pro-marquee"><div class="wrap"><span>ANFRAGEPRO</span><i>●</i><span>LOKAL</span><i>●</i><span>DIREKT</span><i>●</i><span>TRANSPARENT</span><i>●</i><span>ANFRAGEPRO</span></div></section>
+
+<section id="how" class="pro-how"><div class="wrap">
+<div class="pro-section-intro"><span>01 / DER ABLAUF</span><h2>Ein klarer Weg.<br><i>Kein Hin und Her.</i></h2><p>Von deiner ersten Anfrage bis zum direkten Kontakt mit einem passenden Dienstleister.</p></div>
+<div class="pro-steps">
+<div class="pro-step"><b>01</b><div class="step-icon">↗</div><h3>Anfrage erstellen</h3><p>Leistung, Ort, Termin und wichtige Details. Alles an einem Platz.</p></div>
+<div class="pro-step"><b>02</b><div class="step-icon">✦</div><h3>Passende Anfragen</h3><p>Dienstleister sehen strukturierte Anfragen, die zu ihrem Profil passen.</p></div>
+<div class="pro-step"><b>03</b><div class="step-icon">→</div><h3>Kontakt aufnehmen</h3><p>Ein Dienstleister übernimmt die Anfrage und die Kontaktdaten werden sichtbar.</p></div>
+</div>
 </div></section>
 
-<section><div class="wrap">
-<h2 class="section-title">Alles, was du brauchst. An einem Ort.</h2>
-<p class="section-lead">Für Kunden und Dienstleister – mit einem klaren Ablauf und passenden Anfragen.</p>
-<div class="features">
-<div class="feature"><div class="icon">📝</div><h3>Klare Anfragen</h3><p>Leistung, Ort, Termin, Umfang und Beschreibung werden strukturiert erfasst.</p></div>
-<div class="feature"><div class="icon">🏢</div><h3>Für Dienstleister</h3><p>Neue Anfragen zentral ansehen und den Bearbeitungsstatus im Dashboard verfolgen.</p></div>
-<div class="feature"><div class="icon">⚡</div><h3>Einfacher Ablauf</h3><p>Weniger Hin und Her: wichtige Informationen stehen direkt in der Anfrage.</p></div>
-</div>
+<section id="for-providers" class="pro-provider-section"><div class="wrap pro-provider-inner">
+<div><span class="pro-overline">FÜR DIENSTLEISTER</span><h2>Weniger suchen.<br><i>Mehr passende Aufträge.</i></h2><p>Pflege dein Profil, sieh neue Anfragen und verwalte den Status deiner Aufträge direkt in deinem Dashboard.</p><a class="pro-dark-btn" href="#register" onclick="view('register');return false">Als Dienstleister starten <b>→</b></a></div>
+<div class="pro-dashboard-preview"><div class="preview-top"><span>ANFRAGEPRO / DASHBOARD</span><i>●</i></div><div class="preview-count"><strong>Neue Anfrage</strong><span>1</span></div><div class="preview-match"><span>✓</span><div><b>Fensterreinigung</b><small>Gifhorn · Ort passt · Leistung passt</small></div><em>→</em></div><div class="preview-line"></div><div class="preview-status"><span>AUFTRAG</span><b>Kontakt aufgenommen</b></div></div>
 </div></section>
 
-<section><div class="wrap"><div class="cta">
-<div><h2>Was brauchst du heute?</h2><p>Erstelle eine Anfrage oder starte als Dienstleister.</p></div>
-<button type="button" onclick="openCustomerRequest()">Anfrage erstellen</button>
-</div></div></section>
+<section class="pro-final"><div class="wrap"><div class="pro-final-card"><div><span>ANFRAGEPRO</span><h2>Ein guter Auftrag<br>beginnt mit einer guten Anfrage.</h2></div><button onclick="openCustomerRequest()">Anfrage erstellen <b>↗</b></button></div></div></section>
 </main>
+<footer class="pro-footer"><div class="wrap"><span>© 2026 AnfragePro</span><div><a href="#" onclick="view('login');return false">Login</a><a href="#" onclick="view('register');return false">Registrieren</a></div></div></footer>
+</div>
+
+
 
 <footer><div class="wrap footer-inner"><div>© 2026 AnfragePro</div><div class="footer-links"><a href="#" onclick="view('login');return false">Login</a><a href="#" onclick="view('register');return false">Registrieren</a><a href="#" onclick="view('request');return false">Kundenanfrage</a></div></div></footer>
 </div>
