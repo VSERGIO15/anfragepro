@@ -6,42 +6,42 @@
 <title>AnfragePro – Dienstleistungen einfach finden</title>
 <meta name="description" content="AnfragePro verbindet Kunden mit Dienstleistern. Anfrage erstellen oder neue Aufträge erhalten.">
 <style>
-:root{--ink:#17202a;--muted:#667085;--line:#e6e9ee;--bg:#f6f8fb;--card:#fff;--accent:#111827;--soft:#eef2f7}
+:root{--ink:#142033;--muted:#667085;--line:#e7eaf0;--bg:#f5f7fb;--card:#fff;--accent:#142033;--brand:#ffb703;--soft:#eef3f8}
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:var(--bg)}
 a{color:inherit;text-decoration:none}
-.wrap{max-width:1120px;margin:auto;padding:0 22px}
-header{padding:22px 0}
+.wrap{max-width:1180px;margin:auto;padding:0 22px}
+header{padding:20px 0}
 .nav{display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:25px;font-weight:800;letter-spacing:-.5px}
+.logo{font-size:27px;font-weight:900;letter-spacing:-1px}.logo:before{content:"✦";display:inline-grid;place-items:center;width:31px;height:31px;margin-right:8px;border-radius:10px;background:var(--brand);color:#142033;font-size:17px}
 .logo span{color:#64748b}
 .navlinks{display:flex;gap:10px;align-items:center}
 .navlinks button{background:transparent;color:var(--ink);border:1px solid transparent}
-.hero{padding:18px 0 20px}
-.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:center}
-.badge{display:inline-block;background:var(--soft);padding:8px 12px;border-radius:999px;font-size:14px;font-weight:700;margin-bottom:18px}
-h1{font-size:clamp(38px,4.5vw,52px);line-height:1.04;letter-spacing:-1.8px;margin:0 0 12px}
-.lead{font-size:17px;line-height:1.4;color:var(--muted);max-width:680px;margin:0 0 14px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.choice{display:block;width:100%;border:1px solid var(--line);background:var(--card);color:var(--ink)!important;border-radius:14px;padding:13px;text-align:left;cursor:pointer;transition:.15s;font-family:inherit;text-decoration:none}
-.choice:hover{transform:translateY(-2px);box-shadow:0 10px 30px #11182712}
-.choice.primary{background:var(--accent);color:#fff!important;border-color:var(--accent)}
+.hero{padding:28px 0 34px}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #f0d58a;padding:9px 13px;border-radius:999px;font-size:14px;font-weight:800;margin-bottom:18px;box-shadow:0 8px 24px #1420330b}.badge:before{content:"●";color:#16a34a;font-size:10px}
+h1{font-size:clamp(42px,5.2vw,66px);line-height:1.01;letter-spacing:-2.8px;margin:0 0 16px;max-width:720px}h1 em{font-style:normal;color:#d97706}
+.lead{font-size:18px;line-height:1.55;color:var(--muted);max-width:650px;margin:0 0 22px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:680px}
+.choice{display:block;width:100%;border:1px solid #e0e5ec;background:var(--card);color:var(--ink)!important;border-radius:18px;padding:17px;text-align:left;cursor:pointer;transition:.18s;font-family:inherit;text-decoration:none;box-shadow:0 10px 28px #1420330b}
+.choice:hover{transform:translateY(-3px);box-shadow:0 18px 38px #14203318}
+.choice.primary{background:var(--accent);color:#fff!important;border-color:var(--accent);box-shadow:0 16px 34px #14203328}.choice.primary:after{content:"→";float:right;font-size:22px;color:var(--brand);margin-top:5px}
 .choice .icon{font-size:21px;margin-bottom:6px}
 .choice strong{display:block;color:inherit;font-size:16px;line-height:1.2;margin-bottom:5px}
 .choice small{display:block;color:inherit;opacity:.72;font-size:13px}.choice.provider{color:var(--ink)!important;background:#fff!important}.choice.provider strong,.choice.provider small{color:var(--ink)!important;-webkit-text-fill-color:var(--ink)}
-.hero-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 18px 50px #11182710}
+.hero-card{background:#fff;border:1px solid #e2e7ee;border-radius:28px;padding:22px;box-shadow:0 28px 70px #14203318;position:relative;overflow:hidden}.hero-card:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:#ffd16655;right:-70px;top:-70px}.hero-card>*{position:relative}
 .hero-card h3{margin:0 0 6px;font-size:20px}
 .hero-card p{color:var(--muted);line-height:1.35}
 .flow{display:grid;gap:6px;margin-top:10px}
-.flow-item{display:flex;gap:14px;align-items:center;padding:8px;background:#f8fafc;border-radius:14px}
-.num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
-section{padding:48px 0}
-.section-title{text-align:center;font-size:32px;letter-spacing:-1px;margin:0 0 10px}
+.flow-item{display:flex;gap:14px;align-items:center;padding:11px;background:#f8fafc;border-radius:16px;border:1px solid #edf0f4}
+.num{width:31px;height:31px;border-radius:10px;background:var(--brand);color:#142033;display:grid;place-items:center;font-weight:900;flex:none}
+section{padding:64px 0}
+.section-title{text-align:center;font-size:clamp(28px,4vw,40px);letter-spacing:-1.4px;margin:0 0 10px}
 .section-lead{text-align:center;color:var(--muted);margin:0 auto 28px;max-width:650px}
 .features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.feature{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+.feature{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:25px;box-shadow:0 12px 34px #14203308;transition:.18s}.feature:hover{transform:translateY(-3px);box-shadow:0 18px 42px #14203312}
 .feature .icon{font-size:26px}.feature h3{margin:14px 0 8px}.feature p{color:var(--muted);line-height:1.5;margin:0}
-.cta{background:var(--accent);color:#fff;border-radius:24px;padding:38px;display:flex;justify-content:space-between;gap:24px;align-items:center}
+.cta{background:linear-gradient(135deg,#142033,#23324a);color:#fff;border-radius:28px;padding:42px;display:flex;justify-content:space-between;gap:24px;align-items:center;box-shadow:0 24px 60px #14203320}.cta button{background:var(--brand);color:#142033}
 .cta h2{margin:0 0 8px;font-size:30px}.cta p{margin:0;color:#cbd5e1}
 footer{padding:34px 0 45px;color:var(--muted);font-size:14px}
 .footer-inner{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding-top:22px}
@@ -53,7 +53,7 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 .secondary{background:#fff;color:var(--ink);border:1px solid #d1d5db}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.muted{color:var(--muted)}.hide{display:none}.tabs{display:flex;gap:8px;flex-wrap:wrap}.req{border:1px solid var(--line);padding:15px;border-radius:11px;margin:10px 0}
 @media(max-width:800px){.hero-grid{grid-template-columns:1fr}.features{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.navlinks{display:none}.cta{display:block}.cta button{margin-top:20px}}
-@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}h1{letter-spacing:-1.5px}.hero{padding-top:30px}}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}h1{letter-spacing:-2px;font-size:43px}.hero{padding-top:20px}.hero-grid{gap:22px}.hero-card{border-radius:22px;padding:18px}.cta{padding:28px;border-radius:22px}.section-title{text-align:left}.section-lead{text-align:left}}
 </style>
 </head>
 <body>
@@ -67,8 +67,8 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 <section class="hero"><div class="wrap hero-grid">
 <div>
 <div class="badge">Einfach. Direkt. AnfragePro.</div>
-<h1>Dienstleistungen einfach finden oder Aufträge erhalten.</h1>
-<p class="lead">AnfragePro verbindet Kunden mit Dienstleistern. Erstelle eine Anfrage oder verwalte neue Aufträge übersichtlich an einem Ort.</p>
+<h1>Dein Auftrag.<br><em>Der passende</em> Dienstleister.</h1>
+<p class="lead">AnfragePro bringt Menschen und lokale Dienstleister direkt zusammen – einfach, schnell und ohne unnötiges Hin und Her.</p>
 <div class="actions">
 <button type="button" class="choice primary" onclick="openCustomerRequest()"><div class="icon">🔎</div><strong>Ich suche einen Dienstleister</strong><small>Anfrage kostenlos erstellen</small></button>
 <a class="choice provider" href="#register" onclick="view('register');return false"><div class="icon">🏢</div><strong>Ich biete Dienstleistungen an</strong><small>Anfragen erhalten und verwalten</small></a>
@@ -86,8 +86,8 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 </div></section>
 
 <section><div class="wrap">
-<h2 class="section-title">Eine Plattform für beide Seiten</h2>
-<p class="section-lead">AnfragePro bringt Kunden und Unternehmen in einem einfachen Ablauf zusammen.</p>
+<h2 class="section-title">Alles, was du brauchst. An einem Ort.</h2>
+<p class="section-lead">Für Kunden und Dienstleister – mit einem klaren Ablauf und passenden Anfragen.</p>
 <div class="features">
 <div class="feature"><div class="icon">📝</div><h3>Klare Anfragen</h3><p>Leistung, Ort, Termin, Umfang und Beschreibung werden strukturiert erfasst.</p></div>
 <div class="feature"><div class="icon">🏢</div><h3>Für Dienstleister</h3><p>Neue Anfragen zentral ansehen und den Bearbeitungsstatus im Dashboard verfolgen.</p></div>
@@ -96,7 +96,7 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 </div></section>
 
 <section><div class="wrap"><div class="cta">
-<div><h2>Bereit für die erste Anfrage?</h2><p>Starte direkt als Kunde oder registriere dein Unternehmen.</p></div>
+<div><h2>Was brauchst du heute?</h2><p>Erstelle eine Anfrage oder starte als Dienstleister.</p></div>
 <button type="button" onclick="openCustomerRequest()">Anfrage erstellen</button>
 </div></div></section>
 </main>
