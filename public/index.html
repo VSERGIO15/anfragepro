@@ -445,6 +445,13 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-header-cta{display:inline-flex;align-items:center;gap:7px;background:#ffb703;color:#142033!important;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:900;box-shadow:0 8px 20px #14203312;transition:.18s}
 .pro-header-cta b{font-size:16px}.pro-header-cta:hover{transform:translateY(-2px);box-shadow:0 12px 25px #14203318}
 @media(max-width:650px){.pro-header-cta{display:none}}
+
+/* Live request examples */
+.pro-live-requests{padding:58px 0 12px;background:#f4f6f9}
+.pro-live-head{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:22px}
+.pro-live-head>div>span{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#667085}.pro-live-head h2{margin:8px 0 0;font-size:clamp(30px,4vw,42px);letter-spacing:-1.5px}.pro-live-head p{max-width:390px;margin:0;color:#667085;line-height:1.5;font-size:14px}
+.pro-live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.pro-live-card{background:#fff;border:1px solid #e2e7ee;border-radius:22px;padding:20px;box-shadow:0 12px 30px #14203308;transition:.18s}.pro-live-card:hover{transform:translateY(-3px);box-shadow:0 18px 38px #14203312}.pro-live-top{display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:900;letter-spacing:1px;color:#667085}.pro-live-top i{font-style:normal;color:#157347;background:#e6f8ef;border-radius:999px;padding:5px 8px}.pro-live-card h3{font-size:20px;letter-spacing:-.5px;margin:24px 0 8px}.pro-live-card p{color:#667085;line-height:1.5;font-size:14px;min-height:43px}.pro-live-card>div:last-child{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.pro-live-card>div:last-child span{font-size:11px;font-weight:800;color:#475467;background:#f5f7fa;border-radius:999px;padding:7px 9px}
+@media(max-width:800px){.pro-live-head{display:block}.pro-live-head p{margin-top:9px}.pro-live-grid{grid-template-columns:1fr}.pro-live-card h3{margin-top:18px}.pro-live-card p{min-height:0}}
 </style></head>
 <body>
 <div id="home">
@@ -494,7 +501,16 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 <div class="pro-photo-tile clean"><div><strong>Reinigung</strong><span>Vorher · nachher · Details</span></div></div>
 <div class="pro-photo-tile build"><div><strong>Handwerk</strong><span>Projekt · Reparatur</span></div></div>
 <div class="pro-photo-tile garden"><div><strong>Garten</strong><span>Außenbereich · Pflege</span></div></div>
-</div></div></section><section class="pro-category"><div class="wrap">
+</div></div></section><section class="pro-live-requests"><div class="wrap">
+<div class="pro-live-head"><div><span>AKTUELLE BEISPIELE</span><h2>So sehen Anfragen aus.</h2></div><p>Kurz beschrieben, klar strukturiert und direkt für passende Dienstleister sichtbar.</p></div>
+<div class="pro-live-grid">
+<div class="pro-live-card"><div class="pro-live-top"><span>REINIGUNG</span><i>NEU</i></div><h3>Fensterreinigung</h3><p>Mehrere Fenster in einem Einfamilienhaus reinigen.</p><div><span>⌖ Gifhorn</span><span>◷ Einmalig</span></div></div>
+<div class="pro-live-card"><div class="pro-live-top"><span>HANDWERK</span><i>NEU</i></div><h3>Montage & Reparatur</h3><p>Kleine Reparatur und anschließende Montage vor Ort.</p><div><span>⌖ Gifhorn</span><span>◷ Nach Termin</span></div></div>
+<div class="pro-live-card"><div class="pro-live-top"><span>GARTEN</span><i>NEU</i></div><h3>Gartenpflege</h3><p>Hecke schneiden und Außenbereich wieder in Ordnung bringen.</p><div><span>⌖ Region Gifhorn</span><span>◷ Einmalig</span></div></div>
+</div>
+</div></section>
+
+<section class="pro-category"><div class="wrap">
 <div class="pro-category-head"><div><span>BEISPIELE</span><h2>Womit können wir starten?</h2></div><p>Von Reinigung bis Handwerk: Deine Anfrage beschreibt, was du wirklich brauchst.</p></div>
 <div class="pro-category-grid">
 <div class="pro-category-card"><i>⌁</i><b>Reinigung</b><span>Fenster · Haushalt · Büro</span></div>
