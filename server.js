@@ -1,4 +1,5 @@
 const express=require("express");
+const crypto=require("crypto");
 const session=require("express-session");
 const bcrypt=require("bcryptjs");
 const multer=require("multer");
@@ -30,7 +31,8 @@ async function dbInit(){
   city TEXT DEFAULT '',
   services TEXT DEFAULT '',
   description TEXT DEFAULT '',
-  created_at TIMESTAMPTZ NOT NULL
+  created_at TIMESTAMPTZ NOT NULL,
+  request_token TEXT UNIQUE
  );
  CREATE TABLE IF NOT EXISTS requests(
   id BIGINT PRIMARY KEY,
@@ -51,6 +53,7 @@ async function dbInit(){
   created_at TIMESTAMPTZ NOT NULL
  );
  `);
+ await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS request_token TEXT UNIQUE");
  const count=(await pool.query("SELECT COUNT(*)::int AS n FROM users")).rows[0].n;
  if(count===0){
   const d=read();
@@ -177,14 +180,25 @@ app.get("/api/requests",auth,async(req,res)=>{
 app.post("/api/requests",upload.array("photos",8),async(req,res)=>{
  try{
   const {service_type,service,place,date,scope,frequency,description,name,phone,email}=req.body;
-  const id=Date.now(),photoCount=(req.files||[]).length;
+  const id=Date.now(),photoCount=(req.files||[]).length,requestToken=crypto.randomBytes(18).toString("hex");
   if(useDb) await pool.query(
-   "INSERT INTO requests(id,user_id,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count,status,provider_id,created_at) VALUES($1,NULL,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'new',NULL,NOW())",
-   [id,service_type,service,place,date,scope,frequency,description,name,phone,email,photoCount]
+   "INSERT INTO requests(id,user_id,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count,status,provider_id,created_at,request_token) VALUES($1,NULL,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'new',NULL,NOW(),$13)",
+   [id,service_type,service,place,date,scope,frequency,description,name,phone,email,photoCount,requestToken]
   );
-  else{const d=read();d.requests.push({id,user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString()});write(d);}
-  res.json({ok:true,id});
+  else{const d=read();d.requests.push({id,user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString(),request_token:requestToken});write(d);}
+  res.json({ok:true,id,request_token:requestToken});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht gespeichert werden."});}
+});
+
+app.get("/api/request-status/:token",async(req,res)=>{
+ try{
+  const token=String(req.params.token||"");
+  let r;
+  if(useDb) r=(await pool.query("SELECT service_type,service,place,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
+  else r=read().requests.find(x=>x.request_token===token);
+  if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+  res.json({service_type:r.service_type,service:r.service,place:r.place,status:r.status,claimed:!!r.provider_id});
+ }catch(e){console.error(e);res.status(500).json({error:"Status konnte nicht geladen werden."});}
 });
 
 app.post("/api/requests/:id/claim",auth,async(req,res)=>{
