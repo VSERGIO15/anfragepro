@@ -65,6 +65,25 @@ textarea{min-height:110px}
 button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
 .secondary{background:#fff;color:var(--ink);border:1px solid #d1d5db}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.muted{color:var(--muted)}.hide{display:none}.tabs{display:flex;gap:8px;flex-wrap:wrap}.req{border:1px solid var(--line);padding:15px;border-radius:11px;margin:10px 0}
+/* AnfragePro dashboard signature */
+#dash{background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);border:1px solid #dfe5ec;border-radius:28px;padding:22px;box-shadow:0 24px 65px #14203312}
+#dash>h2{font-size:38px;letter-spacing:-1.8px;margin:0 0 6px}
+#dash>h2:after{content:"";display:block;width:64px;height:6px;background:#ffb703;border-radius:99px;margin-top:10px}
+#dash #newCount{background:#dc2626!important;box-shadow:0 8px 18px #dc262633}
+#dash>.card{border-radius:22px;border-color:#e4e9ef}
+#dash>.card:first-of-type{background:#142033!important;color:#fff;border:0}
+#dash>.card:first-of-type h3{font-size:22px;margin-top:0}
+#dash input,#dash textarea{background:#fff;border-color:#dfe5ec;border-radius:13px}
+#dash input:focus,#dash textarea:focus{outline:none;border-color:#ffb703;box-shadow:0 0 0 4px #ffb70322}
+#dash button{border-radius:13px}
+#dash #requests{display:grid;gap:14px}
+#dash .req{position:relative;background:#fff;border:1px solid #e1e7ee;border-radius:22px;padding:20px;box-shadow:0 12px 30px #14203308}
+#dash .req b:first-child{font-size:19px;letter-spacing:-.3px}
+#dash .req button{background:#142033;padding:13px 16px;margin-top:8px}
+#dash .req select{border-radius:12px;padding:10px;border:1px solid #dfe5ec;background:#fff}
+#dash .req small{color:#667085}
+.dashboard-label{display:inline-flex;background:#e6f8ef;color:#157347;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:900;letter-spacing:.5px}
+
 /* AnfragePro request flow */
 #request{background:linear-gradient(180deg,#fff 0%,#fbfcfe 100%);border:1px solid #dfe5ec;box-shadow:0 28px 70px #14203312}
 #request:before{content:"SCHRITT 1 VON 3";display:inline-flex;align-items:center;background:#142033;color:#fff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:900;letter-spacing:.8px;margin-bottom:12px}
@@ -200,7 +219,7 @@ body{background:var(--bg)}
 <div><label>Dein Name</label><input id="rn" placeholder="Vor- und Nachname" required></div><div><label>Telefon</label><input id="rphone" placeholder="z. B. 0151 12345678" required></div>
 <div class="full"><label>E-Mail</label><input id="remail" type="email" placeholder="Damit wir dich erreichen können" required></div>
 </div><button>Absenden</button></form><p id="rnotice"></p><div id="customerStatus" class="card" style="margin:14px 0 0;background:#f8fafc"></div></div>
-<div id="dash" class="card hide"><h2>Dashboard <span id="newCount" style="display:none;margin-left:8px;padding:4px 9px;border-radius:999px;background:#111827;color:#fff;font-size:13px;font-weight:700"></span></h2><p id="who" class="muted"></p>
+<div id="dash" class="card hide"><div class="dashboard-label">DIENSTLEISTER · DEIN ARBEITSBEREICH</div><h2>Dein Dashboard <span id="newCount" style="display:none;margin-left:8px;padding:4px 9px;border-radius:999px;background:#111827;color:#fff;font-size:13px;font-weight:700"></span></h2><p id="who" class="muted"></p>
 <div class="card" style="margin:16px 0 0;background:#f8fafc"><h3>Unternehmensprofil</h3><form onsubmit="saveProfile(event)"><div class="grid">
 <div><label>Firmenname</label><input id="pc" required></div><div><label>Telefon</label><input id="pp"></div>
 <div><label>Stadt / Einsatzgebiet</label><input id="pcity" placeholder="z. B. Gifhorn"></div><div><label>Leistungen</label><input id="pservices" placeholder="z. B. Reinigung, Fensterreinigung"></div>
