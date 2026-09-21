@@ -410,7 +410,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-hero-grid{grid-template-columns:1fr 1.05fr!important;gap:34px!important}
 .pro-hero-art{min-height:500px!important;padding:0!important;overflow:hidden!important;background:#dbe7ef!important;border-radius:30px!important;position:relative}
 .pro-hero-art:before{display:none!important}.pro-hero-art:after{display:none!important}
-.pro-photo-main{position:absolute;inset:0;background-image:linear-gradient(180deg,rgba(14,49,95,.03),rgba(14,49,95,.48)),url('https://images.pexels.com/photos/3768146/https://chicagowindowcleaning.com/wp-content/uploads/2024/04/Untitled-design-2022-07-28T153252.226.png?auto=compress&cs=tinysrgb&w=1200');background-size:cover;background-position:center}
+.pro-photo-main{position:absolute;inset:0;background-image:linear-gradient(180deg,rgba(14,49,95,.03),rgba(14,49,95,.48)),url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=85');background-size:cover;background-position:center}
 .pro-photo-main:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 48%,rgba(7,24,48,.72) 100%)}
 .pro-photo-copy{position:absolute;left:22px;right:22px;bottom:20px;color:#fff;z-index:3}
 .pro-photo-copy small{display:block;font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.78;margin-bottom:5px}
@@ -599,10 +599,10 @@ async function loadDash(){try{const me=await api("/api/me");$("who").textContent
 </script>
 <script>
 const apHeroPhotos=[
- {image:"https://images.pexels.com/photos/3768146/https://chicagowindowcleaning.com/wp-content/uploads/2024/04/Untitled-design-2022-07-28T153252.226.png?auto=compress&cs=tinysrgb&w=1200",service:"Fensterreinigung",meta:"Gifhorn · einmalig · passender Dienstleister"},
- {image:"https://images.pexels.com/photos/4239034/https://olasdelsol.com/news/N1090F0x700.jpg?auto=compress&cs=tinysrgb&w=1200",service:"Reinigung",meta:"Gifhorn · zuverlässig · lokal"},
- {image:"https://images.pexels.com/photos/6474343/https://homeservicesia.com/images/handyman.png?auto=compress&cs=tinysrgb&w=1200",service:"Handwerk",meta:"Gifhorn · Reparatur · passend"},
- {image:"https://images.pexels.com/photos/1458694/https://www.hs-allroundservice.de/assets/img/services/garten-gestaltung.jpg?auto=compress&cs=tinysrgb&w=1200",service:"Gartenpflege",meta:"Gifhorn · Außenbereich · lokal"}
+ {image:"https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=85",service:"Fensterreinigung",meta:"Gifhorn · einmalig · passender Dienstleister"},
+ {image:"https://images.unsplash.com/photo-1581579186983-6c0d5c8f2c7d?auto=format&fit=crop&w=1400&q=85",service:"Reinigung",meta:"Gifhorn · zuverlässig · lokal"},
+ {image:"https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1400&q=85",service:"Handwerk",meta:"Gifhorn · Reparatur · passend"},
+ {image:"https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=1400&q=85",service:"Gartenpflege",meta:"Gifhorn · Außenbereich · lokal"}
 ];
 let apPhotoIndex=0;
 function rotateApHeroPhoto(){
