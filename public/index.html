@@ -410,7 +410,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-hero-grid{grid-template-columns:1fr 1.05fr!important;gap:34px!important}
 .pro-hero-art{min-height:500px!important;padding:0!important;overflow:hidden!important;background:#dbe7ef!important;border-radius:30px!important;position:relative}
 .pro-hero-art:before{display:none!important}.pro-hero-art:after{display:none!important}
-.pro-photo-main{position:absolute;inset:0;background-image:linear-gradient(180deg,rgba(14,49,95,.03),rgba(14,49,95,.48)),url('https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85');background-size:cover;background-position:center}
+.pro-photo-main{position:absolute;inset:0;background-image:linear-gradient(180deg,rgba(14,49,95,.03),rgba(14,49,95,.48)),url('https://images.pexels.com/photos/3768146/pexels-photo-3768146.jpeg?auto=compress&cs=tinysrgb&w=1200');background-size:cover;background-position:center}
 .pro-photo-main:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 48%,rgba(7,24,48,.72) 100%)}
 .pro-photo-copy{position:absolute;left:22px;right:22px;bottom:20px;color:#fff;z-index:3}
 .pro-photo-copy small{display:block;font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.78;margin-bottom:5px}
@@ -423,9 +423,9 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-photo-thumb{height:82px;border-radius:14px;background-size:cover;background-position:center;position:relative;overflow:hidden}
 .pro-photo-thumb:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(7,24,48,.55))}
 .pro-photo-thumb b{position:absolute;left:9px;bottom:8px;color:#fff;font-size:10px;z-index:2}
-.pro-photo-thumb.one{background-image:url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=500&q=80')}
-.pro-photo-thumb.two{background-image:url('https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=500&q=80')}
-.pro-photo-thumb.three{background-image:url('https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=500&q=80')}
+.pro-photo-thumb.one{background-image:url('https://images.pexels.com/photos/4239034/pexels-photo-4239034.jpeg?auto=compress&cs=tinysrgb&w=700')}
+.pro-photo-thumb.two{background-image:url('https://images.pexels.com/photos/6474343/pexels-photo-6474343.jpeg?auto=compress&cs=tinysrgb&w=700')}
+.pro-photo-thumb.three{background-image:url('https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=700')}
 .pro-photo-section{padding:45px 0 10px}
 .pro-photo-section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:18px}
 .pro-photo-section-head h2{margin:5px 0 0;color:#0e315f;font-size:32px;letter-spacing:-1.3px}
@@ -435,9 +435,9 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-photo-tile:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(7,24,48,.72))}
 .pro-photo-tile>div{position:absolute;left:18px;bottom:16px;color:#fff;z-index:2}
 .pro-photo-tile strong{display:block;font-size:17px}.pro-photo-tile span{font-size:11px;opacity:.85}
-.pro-photo-tile.clean{background-image:url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=85')}
-.pro-photo-tile.build{background-image:url('https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=700&q=85')}
-.pro-photo-tile.garden{background-image:url('https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=700&q=85')}
+.pro-photo-tile.clean{background-image:url('https://images.pexels.com/photos/4239034/pexels-photo-4239034.jpeg?auto=compress&cs=tinysrgb&w=900')}
+.pro-photo-tile.build{background-image:url('https://images.pexels.com/photos/6474343/pexels-photo-6474343.jpeg?auto=compress&cs=tinysrgb&w=700')}
+.pro-photo-tile.garden{background-image:url('https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=700')}
 @media(max-width:850px){.pro-hero-grid{grid-template-columns:1fr!important}.pro-hero-art{min-height:430px!important}.pro-photo-grid{grid-template-columns:1fr 1fr}.pro-photo-tile.clean{grid-column:1/-1}}
 @media(max-width:650px){.pro-hero-art{min-height:390px!important;border-radius:24px!important}.pro-photo-copy{left:17px;bottom:17px}.pro-photo-copy strong{font-size:19px}.pro-photo-match{right:14px;bottom:14px}.pro-photo-section-head{display:block}.pro-photo-section-head p{margin-top:9px}.pro-photo-grid{grid-template-columns:1fr 1fr}.pro-photo-tile{height:165px;border-radius:17px}.pro-photo-tile.clean{grid-column:1/-1;height:200px}}
 <style>
@@ -596,10 +596,10 @@ async function loadDash(){try{const me=await api("/api/me");$("who").textContent
 </script>
 <script>
 const apHeroPhotos=[
- {image:"https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85",service:"Fensterreinigung",meta:"Gifhorn · einmalig · passender Dienstleister"},
- {image:"https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=85",service:"Reinigung",meta:"Gifhorn · zuverlässig · lokal"},
- {image:"https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1200&q=85",service:"Handwerk",meta:"Gifhorn · Reparatur · passend"},
- {image:"https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=1200&q=85",service:"Gartenpflege",meta:"Gifhorn · Außenbereich · lokal"}
+ {image:"https://images.pexels.com/photos/3768146/pexels-photo-3768146.jpeg?auto=compress&cs=tinysrgb&w=1200",service:"Fensterreinigung",meta:"Gifhorn · einmalig · passender Dienstleister"},
+ {image:"https://images.pexels.com/photos/4239034/pexels-photo-4239034.jpeg?auto=compress&cs=tinysrgb&w=1200",service:"Reinigung",meta:"Gifhorn · zuverlässig · lokal"},
+ {image:"https://images.pexels.com/photos/6474343/pexels-photo-6474343.jpeg?auto=compress&cs=tinysrgb&w=1200",service:"Handwerk",meta:"Gifhorn · Reparatur · passend"},
+ {image:"https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=1200",service:"Gartenpflege",meta:"Gifhorn · Außenbereich · lokal"}
 ];
 let apPhotoIndex=0;
 function rotateApHeroPhoto(){
