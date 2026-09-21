@@ -443,6 +443,31 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 <style>
 .pro-photo-main{transition:opacity .35s ease,transform .35s ease}
 .pro-photo-main.photo-fade{opacity:.15;transform:scale(1.015)}
+</style><style>
+/* V6 mobile hero — photo first, compact text below */
+@media(max-width:850px){
+ .pro-hero-grid{display:flex!important;flex-direction:column!important;gap:22px!important}
+ .pro-hero-art{order:1!important;min-height:390px!important}
+ .pro-hero-copy{order:2!important}
+ .pro-hero{padding-top:18px!important}
+ .pro-kicker{margin-bottom:10px!important}
+ .pro-hero h1{font-size:44px!important;letter-spacing:-2.5px!important;line-height:.96!important;margin:8px 0 12px!important}
+ .pro-hero-copy>p{font-size:15px!important;line-height:1.45!important;margin-bottom:16px!important}
+ .pro-hero-actions{gap:9px!important}
+ .pro-main-btn,.pro-provider-btn{min-height:52px!important;padding:14px 16px!important}
+ .pro-trustline{margin-top:12px!important;line-height:1.6!important}
+}
+@media(max-width:650px){
+ .pro-hero-grid{gap:18px!important}
+ .pro-hero-art{min-height:350px!important;border-radius:22px!important}
+ .pro-photo-badge{top:14px;left:14px;padding:8px 10px;font-size:10px}
+ .pro-photo-copy{left:15px;right:15px;bottom:15px}
+ .pro-photo-copy strong{font-size:18px}
+ .pro-photo-copy span{font-size:11px}
+ .pro-photo-match{right:12px;bottom:12px;font-size:10px;padding:9px 10px}
+ .pro-hero h1{font-size:40px!important}
+ .pro-hero-copy>p{font-size:14px!important}
+}
 </style></style></head>
 <body>
 <div id="home">
