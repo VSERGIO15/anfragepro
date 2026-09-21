@@ -360,6 +360,51 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-final-card button{background:var(--p-trust-dark)}
 .pro-final-card button b{color:#f0c76b}
 .pro-footer{background:#f7f9fc}
+
+/* AnfragePro V4 — commercial product polish */
+.pro-header{position:sticky;top:0;z-index:50;background:rgba(247,249,252,.92);backdrop-filter:blur(14px);border-bottom:1px solid #e5ebf2}
+.pro-nav{min-height:68px}
+.pro-logo{font-size:25px}
+.pro-logo small{display:none}
+.pro-navlinks{gap:18px}
+.pro-navlinks>a{font-size:13px;font-weight:750}
+.pro-login{background:#fff!important;border-radius:12px!important;padding:10px 14px!important;font-weight:800!important}
+.pro-hero{padding-bottom:30px}
+.pro-hero-grid{box-shadow:0 32px 90px rgba(14,49,95,.16)!important}
+.pro-hero-copy>p{max-width:590px}
+.pro-hero-actions{align-items:stretch}
+.pro-main-btn,.pro-provider-btn{min-height:54px!important;border-radius:14px!important;font-weight:850!important}
+.pro-trustline{font-size:12px!important;color:#607187!important}
+.pro-trustline span{display:inline-block;margin-right:14px}
+.pro-trustline span:first-child{font-weight:800}
+.pro-hero-art{box-shadow:inset 0 0 0 1px rgba(23,74,139,.05)}
+.pro-request-card,.pro-provider-card{box-shadow:0 16px 34px rgba(14,49,95,.10)!important}
+.pro-marquee{background:#fff!important;border-top:1px solid #e5ebf2;border-bottom:1px solid #e5ebf2!important}
+.pro-marquee .wrap{min-height:54px}
+.pro-proof{padding:28px 0 10px}
+.pro-proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pro-proof-card{background:#fff;border:1px solid #e3e9f0;border-radius:18px;padding:18px 20px;display:flex;gap:13px;align-items:flex-start}
+.pro-proof-icon{width:38px;height:38px;border-radius:12px;background:#eaf2fb;color:#174a8b;display:grid;place-items:center;font-weight:900;flex:none}
+.pro-proof-card strong{display:block;font-size:14px;color:#0e315f;margin-bottom:4px}
+.pro-proof-card span{display:block;color:#6b7b8e;font-size:12px;line-height:1.45}
+.pro-category{padding:55px 0 20px}
+.pro-category-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}
+.pro-category-head>span{font-size:11px;font-weight:900;letter-spacing:1px;color:#174a8b}
+.pro-category-head h2{margin:6px 0 0;color:#0e315f;font-size:34px;letter-spacing:-1.5px}
+.pro-category-head p{max-width:430px;color:#68798d;font-size:14px;line-height:1.5;margin:0}
+.pro-category-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.pro-category-card{background:#fff;border:1px solid #e3e9f0;border-radius:18px;padding:20px;transition:.18s}
+.pro-category-card:hover{transform:translateY(-3px);box-shadow:0 14px 35px rgba(14,49,95,.09)}
+.pro-category-card b{display:block;color:#0e315f;font-size:15px;margin-bottom:5px}
+.pro-category-card span{font-size:12px;color:#7a8999}
+.pro-category-card i{float:right;font-style:normal;color:#174a8b;font-size:20px}
+.pro-security{margin-top:50px;background:#f7fafc;border:1px solid #e0e8f0;border-radius:24px;padding:22px 25px;display:flex;justify-content:space-between;gap:20px;align-items:center}
+.pro-security strong{color:#0e315f;font-size:14px}
+.pro-security p{margin:4px 0 0;color:#718096;font-size:12px}
+.pro-security-badges{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.pro-security-badges span{background:#fff;border:1px solid #dfe7ef;border-radius:999px;padding:8px 11px;color:#496077;font-size:11px;font-weight:800}
+@media(max-width:850px){.pro-proof-grid{grid-template-columns:1fr}.pro-category-grid{grid-template-columns:repeat(2,1fr)}.pro-category-head{display:block}.pro-category-head p{margin-top:10px}.pro-security{display:block}.pro-security-badges{justify-content:flex-start;margin-top:14px}}
+@media(max-width:650px){.pro-header{position:relative}.pro-nav{min-height:60px}.pro-logo{font-size:22px}.pro-category{padding-top:45px}.pro-category-grid{grid-template-columns:1fr 1fr}.pro-category-card{padding:16px}.pro-category-card b{font-size:14px}.pro-security{padding:18px;border-radius:20px}.pro-security-badges span{font-size:10px}.pro-proof{padding-top:22px}}
 </style></head>
 <body>
 <div id="home">
@@ -401,6 +446,22 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 </section>
 
 <section class="pro-marquee"><div class="wrap"><span>ANFRAGEPRO</span><i>●</i><span>LOKAL</span><i>●</i><span>DIREKT</span><i>●</i><span>TRANSPARENT</span><i>●</i><span>ANFRAGEPRO</span></div></section>
+<section class="pro-proof"><div class="wrap"><div class="pro-proof-grid">
+<div class="pro-proof-card"><div class="pro-proof-icon">✓</div><div><strong>Klar von Anfang an</strong><span>Leistung, Ort und Termin werden strukturiert erfasst.</span></div></div>
+<div class="pro-proof-card"><div class="pro-proof-icon">⌖</div><div><strong>Auf deine Region ausgerichtet</strong><span>Dienstleister sehen Anfragen aus ihrem Einsatzgebiet.</span></div></div>
+<div class="pro-proof-card"><div class="pro-proof-icon">→</div><div><strong>Direkter Kontakt</strong><span>Wenn eine Anfrage übernommen wird, werden die Kontaktdaten sichtbar.</span></div></div>
+</div></div></section>
+
+<section class="pro-category"><div class="wrap">
+<div class="pro-category-head"><div><span>BEISPIELE</span><h2>Womit können wir starten?</h2></div><p>Von Reinigung bis Handwerk: Deine Anfrage beschreibt, was du wirklich brauchst.</p></div>
+<div class="pro-category-grid">
+<div class="pro-category-card"><i>⌁</i><b>Reinigung</b><span>Fenster · Haushalt · Büro</span></div>
+<div class="pro-category-card"><i>✦</i><b>Handwerk</b><span>Reparatur · Montage · Ausbau</span></div>
+<div class="pro-category-card"><i>⌖</i><b>Garten & Außen</b><span>Pflege · Schnitt · Arbeiten</span></div>
+<div class="pro-category-card"><i>→</i><b>Weitere Leistungen</b><span>Deine Anfrage · dein Bedarf</span></div>
+</div>
+<div class="pro-security"><div><strong>Einfach. Direkt. Transparent.</strong><p>AnfragePro zeigt dir klar, was als Nächstes passiert.</p></div><div class="pro-security-badges"><span>✓ Kostenlose Anfrage</span><span>✓ Lokale Suche</span><span>✓ Direkter Kontakt</span></div></div>
+</div></section>
 
 <section id="how" class="pro-how"><div class="wrap">
 <div class="pro-section-intro"><span>01 / DER ABLAUF</span><h2>Ein klarer Weg.<br><i>Kein Hin und Her.</i></h2><p>Von deiner ersten Anfrage bis zum direkten Kontakt mit einem passenden Dienstleister.</p></div>
