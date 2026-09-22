@@ -507,6 +507,20 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
   .pro-proof-card{padding:16px 17px;border-radius:17px}
   .pro-proof-icon{width:34px;height:34px;border-radius:10px}
 }
+
+/* Visual request cards */
+.pro-live-card{padding:0!important;overflow:hidden;position:relative}
+.pro-live-image{height:150px;background-size:cover;background-position:center;position:relative}
+.pro-live-image:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,49,95,0) 45%,rgba(14,49,95,.22) 100%)}
+.pro-live-clean .pro-live-image{background-image:url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80')}
+.pro-live-build .pro-live-image{background-image:url('https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=900&q=80')}
+.pro-live-garden .pro-live-image{background-image:url('https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=900&q=80')}
+.pro-live-body{padding:18px 20px 20px}
+.pro-live-card h3{margin-top:18px}
+@media(max-width:800px){
+  .pro-live-image{height:165px}
+  .pro-live-body{padding:17px 18px 18px}
+}
 </style></head>
 <body>
 <div id="home">
@@ -561,9 +575,9 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 </div></div></section><section class="pro-live-requests"><div class="wrap">
 <div class="pro-live-head"><div><span>AKTUELLE BEISPIELE</span><h2>So sehen Anfragen aus.</h2></div><p>Kurz beschrieben, klar strukturiert und direkt für passende Dienstleister sichtbar.</p></div>
 <div class="pro-live-grid">
-<div class="pro-live-card"><div class="pro-live-top"><span>REINIGUNG</span><i>NEU</i></div><h3>Fensterreinigung</h3><p>Mehrere Fenster in einem Einfamilienhaus reinigen.</p><div><span>⌖ Gifhorn</span><span>◷ Einmalig</span></div></div>
-<div class="pro-live-card"><div class="pro-live-top"><span>HANDWERK</span><i>NEU</i></div><h3>Montage & Reparatur</h3><p>Kleine Reparatur und anschließende Montage vor Ort.</p><div><span>⌖ Gifhorn</span><span>◷ Nach Termin</span></div></div>
-<div class="pro-live-card"><div class="pro-live-top"><span>GARTEN</span><i>NEU</i></div><h3>Gartenpflege</h3><p>Hecke schneiden und Außenbereich wieder in Ordnung bringen.</p><div><span>⌖ Region Gifhorn</span><span>◷ Einmalig</span></div></div>
+<div class="pro-live-card pro-live-clean"><div class="pro-live-image"></div><div class="pro-live-body"><div class="pro-live-top"><span>REINIGUNG</span><i>NEU</i></div><h3>Fensterreinigung</h3><p>Mehrere Fenster in einem Einfamilienhaus reinigen.</p><div><span>⌖ Gifhorn</span><span>◷ Einmalig</span></div></div></div>
+<div class="pro-live-card pro-live-build"><div class="pro-live-image"></div><div class="pro-live-body"><div class="pro-live-top"><span>HANDWERK</span><i>NEU</i></div><h3>Montage & Reparatur</h3><p>Kleine Reparatur und anschließende Montage vor Ort.</p><div><span>⌖ Gifhorn</span><span>◷ Nach Termin</span></div></div></div>
+<div class="pro-live-card pro-live-garden"><div class="pro-live-image"></div><div class="pro-live-body"><div class="pro-live-top"><span>GARTEN</span><i>NEU</i></div><h3>Gartenpflege</h3><p>Hecke schneiden und Außenbereich wieder in Ordnung bringen.</p><div><span>⌖ Region Gifhorn</span><span>◷ Einmalig</span></div></div></div>
 </div>
 </div></section>
 
