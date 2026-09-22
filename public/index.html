@@ -521,6 +521,35 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
   .pro-live-image{height:165px}
   .pro-live-body{padding:17px 18px 18px}
 }
+
+/* Visual service categories */
+.pro-category-grid{grid-template-columns:repeat(4,1fr);gap:12px}
+.pro-category-card{padding:0!important;overflow:hidden;min-height:190px;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+.pro-cat-image{height:108px;background-size:cover;background-position:center}
+.pro-cat-clean .pro-cat-image{background-image:url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=700&q=80')}
+.pro-cat-build .pro-cat-image{background-image:url('https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=700&q=80')}
+.pro-cat-garden .pro-cat-image{background-image:url('https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=700&q=80')}
+.pro-cat-content{position:relative;padding:16px 18px 18px;background:#fff;min-height:82px}
+.pro-cat-content i{float:right;font-style:normal;color:#174a8b;font-size:20px}
+.pro-cat-content b{display:block;color:#0e315f;font-size:15px;margin-bottom:5px}
+.pro-cat-content span{font-size:12px;color:#7a8999}
+.pro-cat-more{background:#0e315f;color:#fff;border-color:#0e315f}
+.pro-cat-more .pro-cat-content{background:#0e315f;min-height:100%;display:flex;flex-direction:column;justify-content:flex-end}
+.pro-cat-more .pro-cat-content i{color:#d9a441;margin-bottom:auto}
+.pro-cat-more .pro-cat-content b{color:#fff;font-size:18px}
+.pro-cat-more .pro-cat-content span{color:#b9c9d9}
+@media(max-width:800px){
+  .pro-category-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .pro-category-card{min-height:190px}
+  .pro-cat-image{height:105px}
+  .pro-cat-content{padding:14px 15px 16px}
+}
+@media(max-width:480px){
+  .pro-category-grid{grid-template-columns:1fr 1fr}
+  .pro-category-card{min-height:175px;border-radius:17px}
+  .pro-cat-image{height:92px}
+  .pro-cat-content{min-height:83px}
+}
 </style></head>
 <body>
 <div id="home">
@@ -584,10 +613,10 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 <section class="pro-category"><div class="wrap">
 <div class="pro-category-head"><div><span>BEISPIELE</span><h2>Womit können wir starten?</h2></div><p>Von Reinigung bis Handwerk: Deine Anfrage beschreibt, was du wirklich brauchst.</p></div>
 <div class="pro-category-grid">
-<div class="pro-category-card"><i>⌁</i><b>Reinigung</b><span>Fenster · Haushalt · Büro</span></div>
-<div class="pro-category-card"><i>✦</i><b>Handwerk</b><span>Reparatur · Montage · Ausbau</span></div>
-<div class="pro-category-card"><i>⌖</i><b>Garten & Außen</b><span>Pflege · Schnitt · Arbeiten</span></div>
-<div class="pro-category-card"><i>→</i><b>Weitere Leistungen</b><span>Deine Anfrage · dein Bedarf</span></div>
+<div class="pro-category-card pro-cat-clean"><div class="pro-cat-image"></div><div class="pro-cat-content"><i>⌁</i><b>Reinigung</b><span>Fenster · Haushalt · Büro</span></div></div>
+<div class="pro-category-card pro-cat-build"><div class="pro-cat-image"></div><div class="pro-cat-content"><i>✦</i><b>Handwerk</b><span>Reparatur · Montage · Ausbau</span></div></div>
+<div class="pro-category-card pro-cat-garden"><div class="pro-cat-image"></div><div class="pro-cat-content"><i>⌖</i><b>Garten & Außen</b><span>Pflege · Schnitt · Arbeiten</span></div></div>
+<div class="pro-category-card pro-cat-more"><div class="pro-cat-content"><i>→</i><b>Weitere Leistungen</b><span>Deine Anfrage · dein Bedarf</span></div></div>
 </div>
 <div class="pro-security"><div><strong>Einfach. Direkt. Transparent.</strong><p>AnfragePro zeigt dir klar, was als Nächstes passiert.</p></div><div class="pro-security-badges"><span>✓ Kostenlose Anfrage</span><span>✓ Lokale Suche</span><span>✓ Direkter Kontakt</span></div></div>
 </div></section>
