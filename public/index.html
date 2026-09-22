@@ -488,6 +488,25 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
   .pro-trustline{margin-top:7px!important;font-size:9.5px!important}
   .pro-hero-art{min-height:320px!important}
 }
+
+/* Proof section — stronger transition after hero photo */
+.pro-proof{padding:46px 0 18px}
+.pro-proof-intro{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:end;margin-bottom:22px}
+.pro-proof-intro>span{grid-column:1/-1;font-size:10px;font-weight:900;letter-spacing:1.6px;color:#174a8b}
+.pro-proof-intro h2{margin:0;color:#0e315f;font-size:clamp(32px,4vw,46px);line-height:.98;letter-spacing:-2px}
+.pro-proof-intro h2 i{font-style:normal;color:#16846b}
+.pro-proof-intro p{margin:0;color:#68798d;font-size:14px;line-height:1.5;max-width:390px}
+.pro-proof-card{border-radius:20px;padding:19px 20px}
+@media(max-width:650px){
+  .pro-proof{padding:34px 0 14px}
+  .pro-proof-intro{grid-template-columns:1fr;gap:9px;margin-bottom:16px}
+  .pro-proof-intro>span{grid-column:auto}
+  .pro-proof-intro h2{font-size:34px;letter-spacing:-1.5px}
+  .pro-proof-intro p{font-size:13px;line-height:1.45}
+  .pro-proof-grid{grid-template-columns:1fr;gap:9px}
+  .pro-proof-card{padding:16px 17px;border-radius:17px}
+  .pro-proof-icon{width:34px;height:34px;border-radius:10px}
+}
 </style></head>
 <body>
 <div id="home">
@@ -525,7 +544,9 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 </section>
 
 <section class="pro-marquee"><div class="wrap"><span>ANFRAGEPRO</span><i>●</i><span>LOKAL</span><i>●</i><span>DIREKT</span><i>●</i><span>TRANSPARENT</span><i>●</i><span>ANFRAGEPRO</span></div></section>
-<section class="pro-proof"><div class="wrap"><div class="pro-proof-grid">
+<section class="pro-proof"><div class="wrap">
+<div class="pro-proof-intro"><span>02 / WARUM ANFRAGEPRO</span><h2>Weniger suchen.<br><i>Mehr Klarheit.</i></h2><p>Von der ersten Beschreibung bis zum direkten Kontakt bleibt sichtbar, was als Nächstes passiert.</p></div>
+<div class="pro-proof-grid">
 <div class="pro-proof-card"><div class="pro-proof-icon">✓</div><div><strong>Klar von Anfang an</strong><span>Leistung, Ort und Termin werden strukturiert erfasst.</span></div></div>
 <div class="pro-proof-card"><div class="pro-proof-icon">⌖</div><div><strong>Auf deine Region ausgerichtet</strong><span>Dienstleister sehen Anfragen aus ihrem Einsatzgebiet.</span></div></div>
 <div class="pro-proof-card"><div class="pro-proof-icon">→</div><div><strong>Direkter Kontakt</strong><span>Wenn eine Anfrage übernommen wird, werden die Kontaktdaten sichtbar.</span></div></div>
