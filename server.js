@@ -189,10 +189,10 @@ app.get("/api/provider-profile/:id",async(req,res)=>{
   const id=Number(req.params.id);let u,photos=[];
   if(useDb){
    u=(await pool.query("SELECT id,company,phone,city,services,description FROM users WHERE id=$1",[id])).rows[0];
-   photos=(await pool.query("SELECT image_url FROM provider_portfolio WHERE provider_id=$1 ORDER BY id DESC",[id])).rows.map(x=>x.image_url);
+   photos=(await pool.query("SELECT id,image_url FROM provider_portfolio WHERE provider_id=$1 ORDER BY id DESC",[id])).rows;
   }else{
    const d=read();u=(d.users||[]).find(x=>Number(x.id)===id)||null;
-   photos=(d.provider_portfolio||[]).filter(x=>Number(x.provider_id)===id).map(x=>x.image_url);
+   photos=(d.provider_portfolio||[]).filter(x=>Number(x.provider_id)===id).map(x=>({id:x.id,image_url:x.image_url}));
   }
   if(!u)return res.status(404).json({error:"Dienstleister nicht gefunden."});
   res.json({company:u.company,phone:u.phone||"",city:u.city||"",services:u.services||"",description:u.description||"",photos});
