@@ -479,7 +479,7 @@ app.post("/api/request-status/:token/messages",async(req,res)=>{
   if(useDb){
    r=(await pool.query("SELECT id,status,provider_id,name FROM requests WHERE request_token=$1",[token])).rows[0];
    if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
-   if(!r.provider_id||!["accepted","contacted"].includes(String(r.status)))return res.status(403).json({error:"Chat ist nach Annahme des Auftrags verfügbar."});
+   if(!r.provider_id||String(r.status)!=="accepted")return res.status(403).json({error:"Chat ist nach Annahme des Auftrags verfügbar."});
    if(req.session.userId&&Number(req.session.userId)===Number(r.provider_id)){role="provider";const u=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];name=u?.company||"Dienstleister"}
    else{role="customer";name=r.name||"Kunde"}
    await pool.query("INSERT INTO request_messages(request_id,sender_role,sender_name,message,created_at) VALUES($1,$2,$3,$4,NOW())",[r.id,role,name,message]);
