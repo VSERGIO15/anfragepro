@@ -673,6 +673,12 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-main-btn:after{content:"";position:absolute;z-index:-1;inset:2px;border-radius:inherit;background:#ffb703}
 @keyframes proCtaRing{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.pro-main-btn:before{animation:none}}
+
+/* LED light sweep through hero lettering */
+.pro-hero h1 .led-word{display:inline-block;color:transparent;background:linear-gradient(110deg,#0e315f 0%,#0e315f 42%,#ffb7d7 47%,#fff 50%,#ffb7d7 53%,#0e315f 58%,#0e315f 100%);background-size:260% 100%;background-position:100% 0;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:heroLedSweep 3.8s ease-in-out infinite}
+.pro-hero h1 i .led-word{background:linear-gradient(110deg,#d9a441 0%,#d9a441 42%,#ffd9ea 47%,#fff 50%,#ffd9ea 53%,#d9a441 58%,#d9a441 100%);background-size:260% 100%;background-position:100% 0;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+@keyframes heroLedSweep{0%,18%{background-position:100% 0}55%,100%{background-position:-160% 0}}
+@media(prefers-reduced-motion:reduce){.pro-hero h1 .led-word{animation:none;background-position:50% 0}}
 </style></head>
 <body>
 <div id="home">
@@ -691,7 +697,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 <div class="pro-kicker"><span></span> DIENSTLEISTUNGEN. NEU GEDACHT.</div>
 <div class="pro-hero-grid">
 <div class="pro-hero-copy">
-<h1>Was brauchst du?<br><i>Wir finden den Weg.</i></h1>
+<h1><span class="led-word">Was brauchst du?</span><br><i><span class="led-word">Wir finden den Weg.</span></i></h1>
 <p>Beschreibe deinen Auftrag einmal. AnfragePro bringt deine Anfrage mit passenden Dienstleistern in deiner Nähe zusammen.</p>
 <div class="pro-hero-actions">
 <button class="pro-main-btn" onclick="openCustomerRequest()">Anfrage erstellen <b>↗</b></button>
