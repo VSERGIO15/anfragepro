@@ -421,6 +421,14 @@ app.patch("/api/requests/:id",auth,async(req,res)=>{
 
 app.get("/health",(req,res)=>res.json({ok:true,service:"AnfragePro",database:useDb?"postgres":"json"}));
 
+app.use((err,req,res,next)=>{
+ if(err&&err.code==="LIMIT_FILE_SIZE")return res.status(400).json({error:"Ein Bild ist zu groß. Maximal 5 MB pro Datei."});
+ if(err&&err.code==="LIMIT_FILE_COUNT")return res.status(400).json({error:"Maximal 8 Bilder erlaubt."});
+ if(err&&err.message==="Nur Bilddateien sind erlaubt.")return res.status(400).json({error:err.message});
+ console.error(err);
+ res.status(500).json({error:"Interner Serverfehler."});
+});
+
 
 
 dbInit().then(()=>app.listen(PORT,()=>console.log(`AnfragePro läuft auf http://localhost:${PORT} | DB: ${useDb?"Postgres":"JSON"}`))).catch(e=>{console.error("DB init failed",e);process.exit(1);});
