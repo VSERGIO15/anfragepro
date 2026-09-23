@@ -218,6 +218,7 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 /* AnfragePro signature design */
 :root{--ink:#142033;--muted:#667085;--line:#e5e9ef;--bg:#f4f6f9;--card:#fff;--accent:#142033;--brand:#ffb703;--brand2:#ffd166;--mint:#dff7ed}
 body{background:var(--bg)}
+body:has(#app:not(.hide)) > footer{display:none!important}
 #home{position:relative;overflow:hidden}
 #home:after{content:"";position:absolute;z-index:-1;right:-140px;top:150px;width:360px;height:360px;border-radius:42% 58% 61% 39%;background:#ffd16633;transform:rotate(18deg)}
 #home .hero{padding-top:38px}
