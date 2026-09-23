@@ -504,10 +504,12 @@ app.post("/api/requests/:id/offer",auth,async(req,res)=>{
   if(priceMin!==null&&priceMax!==null&&priceMax<priceMin)return res.status(400).json({error:"Der Höchstpreis darf nicht kleiner sein."});
   if(!availability&&!message&&priceMin===null&&priceMax===null)return res.status(400).json({error:"Bitte mindestens Preis, Verfügbarkeit oder Nachricht angeben."});
   if(useDb){
-   const r=(await pool.query("SELECT provider_id,status FROM requests WHERE id=$1",[id])).rows[0];
+   const r=(await pool.query("SELECT provider_id,status,email,name,phone,service,service_type,place,request_token FROM requests WHERE id=$1",[id])).rows[0];
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
    await pool.query("INSERT INTO request_offers(request_id,provider_id,price_min,price_max,availability,message,status,created_at) VALUES($1,$2,$3,$4,$5,$6,'pending',NOW()) ON CONFLICT(request_id) DO UPDATE SET price_min=EXCLUDED.price_min,price_max=EXCLUDED.price_max,availability=EXCLUDED.availability,message=EXCLUDED.message,status='pending',created_at=NOW()",[id,req.session.userId,priceMin,priceMax,availability,message]);
+   const provider=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];
+   await sendOfferEmail(r,{price_min:priceMin,price_max:priceMax},provider?.company);
   }else{
    const d=read(),r=d.requests.find(x=>Number(x.id)===id);
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
