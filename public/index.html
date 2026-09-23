@@ -662,10 +662,10 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 }
 
 /* Animated pink ring around provider phone field */
-#dash .phone-field{position:relative;border-radius:14px;padding:3px;overflow:hidden;background:#f8fafc;box-shadow:0 0 0 1px #ffd8e9,0 5px 18px #ff9fc933}
-#dash .phone-field:before{content:"";position:absolute;z-index:0;inset:-60%;background:conic-gradient(from 0deg,#ffd9ea 0deg,#ffd9ea 250deg,#ff77b7 305deg,#ffffff 322deg,#ffb6d8 338deg,#ffd9ea 360deg);animation:phoneRing 2.2s linear infinite}
-#dash .phone-field:after{content:"";position:absolute;z-index:1;inset:3px;border-radius:11px;background:#f8fafc;box-shadow:inset 0 0 0 1px #e6ebf1}
-#dash .phone-field input{position:relative;z-index:2;width:100%;margin:0!important;border:0!important;border-radius:11px!important;background:transparent!important}
+#dash .phone-field,#dash .profile-field{position:relative;border-radius:14px;padding:3px;overflow:hidden;background:#f8fafc;box-shadow:0 0 0 1px #ffd8e9,0 5px 18px #ff9fc933}
+#dash .phone-field:before,#dash .profile-field:before{content:"";position:absolute;z-index:0;inset:-60%;background:conic-gradient(from 0deg,#ffd9ea 0deg,#ffd9ea 250deg,#ff77b7 305deg,#ffffff 322deg,#ffb6d8 338deg,#ffd9ea 360deg);animation:phoneRing 2.2s linear infinite}
+#dash .phone-field:after,#dash .profile-field:after{content:"";position:absolute;z-index:1;inset:3px;border-radius:11px;background:#f8fafc;box-shadow:inset 0 0 0 1px #e6ebf1}
+#dash .phone-field input,#dash .profile-field input,#dash .profile-field textarea{position:relative;z-index:2;width:100%;margin:0!important;border:0!important;border-radius:11px!important;background:transparent!important}
 @keyframes phoneRing{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){#dash .phone-field:before{animation:none}}
 </style></head>
@@ -780,9 +780,9 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 </div><button>Absenden</button></form><p id="rnotice"></p><div id="customerStatus" class="card" style="margin:14px 0 0;background:#f8fafc"></div></div>
 <div id="dash" class="card hide"><div class="dashboard-label">DIENSTLEISTER · DEIN ARBEITSBEREICH</div><h2>Dein Dashboard</h2><span id="newCount" style="display:none"></span><p id="who" class="muted"></p>
 <div class="card" style="margin:16px 0 0;background:#f8fafc"><h3>Unternehmensprofil</h3><form onsubmit="saveProfile(event)"><div class="grid">
-<div><label>Firmenname</label><input id="pc" required></div><div><label>Telefon</label><div class="phone-field"><input id="pp"></div></div>
-<div><label>Stadt / Einsatzgebiet</label><input id="pcity" placeholder="z. B. Gifhorn"></div><div><label>Leistungen</label><input id="pservices" placeholder="z. B. Reinigung, Fensterreinigung"></div>
-<div class="full"><label>Beschreibung</label><textarea id="pdesc" placeholder="Kurzbeschreibung deines Unternehmens"></textarea></div>
+<div><label>Firmenname</label><div class="profile-field"><input id="pc" required></div></div><div><label>Telefon</label><div class="profile-field"><input id="pp"></div></div>
+<div><label>Stadt / Einsatzgebiet</label><div class="profile-field"><input id="pcity" placeholder="z. B. Gifhorn"></div></div><div><label>Leistungen</label><div class="profile-field"><input id="pservices" placeholder="z. B. Reinigung, Fensterreinigung"></div></div>
+<div class="full"><label>Beschreibung</label><div class="profile-field"><textarea id="pdesc" placeholder="Kurzbeschreibung deines Unternehmens"></textarea></div></div>
 </div><button>Profil speichern</button></form><p id="pmsg"></p></div>
 <div class="dash-tools"><button onclick="loadDash()">Aktualisieren</button><button onclick="logout()" class="secondary">Logout</button></div><div class="dash-requests-head"><div><span>AUFTRÄGE</span><h3>Neue Anfragen</h3><p>Passende Anfragen aus deinem Einsatzgebiet.</p></div><div id="requestCount" class="dash-request-count"></div></div><div id="requests" style="margin-top:10px"></div></div>
 </div>
