@@ -19,6 +19,32 @@ const write=d=>fs.writeFileSync(DATA,JSON.stringify(d,null,2));
 const useDb=!!process.env.DATABASE_URL;
 const pool=useDb?new Pool({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:false}}):null;
 
+const rateBuckets=new Map();
+function rateLimit({windowMs,max,keyPrefix}){
+ return (req,res,next)=>{
+  const key=keyPrefix+":"+String(req.ip||req.socket.remoteAddress||"unknown");
+  const now=Date.now();
+  let b=rateBuckets.get(key);
+  if(!b||now-b.start>=windowMs){b={start:now,count:0};rateBuckets.set(key,b)}
+  b.count++;
+  if(b.count>max){
+   const retry=Math.max(1,Math.ceil((windowMs-(now-b.start))/1000));
+   res.set("Retry-After",String(retry));
+   return res.status(429).json({error:"Zu viele Versuche. Bitte später erneut versuchen."});
+  }
+  next();
+ };
+}
+setInterval(()=>{const now=Date.now();for(const [k,b] of rateBuckets)if(now-b.start>60*60*1000)rateBuckets.delete(k)},15*60*1000).unref();
+
+const publicRequestLimit=rateLimit({windowMs:60*60*1000,max:10,keyPrefix:"request"});
+const loginLimit=rateLimit({windowMs:15*60*1000,max:10,keyPrefix:"login"});
+const registerLimit=rateLimit({windowMs:60*60*1000,max:5,keyPrefix:"register"});
+const reviewLimit=rateLimit({windowMs:60*60*1000,max:10,keyPrefix:"review"});
+const claimLimit=rateLimit({windowMs:15*60*1000,max:30,keyPrefix:"claim"});
+
+
+
 async function sendCustomerClaimEmail(request){
   const to=String(request?.email||"").trim();
   const apiKey=String(process.env.RESEND_API_KEY||"").trim();
@@ -106,8 +132,15 @@ async function dbInit(){
  }
 }
 
-app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.disable("x-powered-by");
+app.use((req,res,next)=>{
+ res.setHeader("X-Content-Type-Options","nosniff");
+ res.setHeader("X-Frame-Options","DENY");
+ res.setHeader("Referrer-Policy","strict-origin-when-cross-origin");
+ next();
+});
+app.use(express.json({limit:"100kb"}));
+app.use(express.urlencoded({extended:true,limit:"50kb"}));
 app.use(session({
  secret:process.env.SESSION_SECRET||"change-this-secret",
  resave:false,saveUninitialized:false,
@@ -115,11 +148,18 @@ app.use(session({
  cookie:{httpOnly:true,sameSite:"lax",secure:true,maxAge:1000*60*60*24*30}
 }));
 app.use(express.static(path.join(__dirname,"public")));
-const upload=multer({dest:UPLOADS});
+const upload=multer({
+ dest:UPLOADS,
+ limits:{files:8,fileSize:5*1024*1024},
+ fileFilter:(req,file,cb)=>{
+  if(/^image\/(jpeg|png|webp|gif|heic|heif)$/.test(String(file.mimetype||"")))return cb(null,true);
+  cb(new Error("Nur Bilddateien sind erlaubt."));
+ }
+});
 
 function auth(req,res,next){if(!req.session.userId)return res.status(401).json({error:"Nicht angemeldet"});next();}
 
-app.post("/api/register",async(req,res)=>{
+app.post("/api/register",registerLimit,async(req,res)=>{
  try{
   const {email,password,company}=req.body;
   if(!email||!password||!company||password.length<8)return res.status(400).json({error:"Firma, E-Mail und mindestens 8 Zeichen Passwort erforderlich."});
@@ -142,7 +182,7 @@ app.post("/api/register",async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler bei der Registrierung."});}
 });
 
-app.post("/api/login",async(req,res)=>{
+app.post("/api/login",loginLimit,async(req,res)=>{
  try{
   const email=(req.body.email||"").trim().toLowerCase();
   let u;
@@ -235,15 +275,19 @@ app.get("/api/requests",auth,async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Anfragen konnten nicht geladen werden."});}
 });
 
-app.post("/api/requests",upload.array("photos",8),async(req,res)=>{
+app.post("/api/requests",publicRequestLimit,upload.array("photos",8),async(req,res)=>{
  try{
   const {service_type,service,place,date,scope,frequency,description,name,phone,email}=req.body;
+  const emailNorm=String(email||"").trim().toLowerCase();
+  if(!service_type||!service||!name||!phone||!emailNorm)return res.status(400).json({error:"Bitte alle Pflichtfelder ausfüllen."});
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm))return res.status(400).json({error:"Bitte eine gültige E-Mail-Adresse eingeben."});
+  if(String(service).length>200||String(name).length>120||String(phone).length>50||String(description||"").length>3000)return res.status(400).json({error:"Ein Feld ist zu lang."});
   const id=Date.now(),photoCount=(req.files||[]).length,requestToken=crypto.randomBytes(18).toString("hex");
   if(useDb) await pool.query(
    "INSERT INTO requests(id,user_id,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count,status,provider_id,created_at,request_token) VALUES($1,NULL,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'new',NULL,NOW(),$13)",
-   [id,service_type,service,place,date,scope,frequency,description,name,phone,email,photoCount,requestToken]
+   [id,service_type,service,place,date,scope,frequency,description,name,phone,emailNorm,photoCount,requestToken]
   );
-  else{const d=read();d.requests.push({id,user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString(),request_token:requestToken});write(d);}
+  else{const d=read();d.requests.push({id,user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email:emailNorm,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString(),request_token:requestToken});write(d);}
   res.json({ok:true,id,request_token:requestToken});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht gespeichert werden."});}
 });
@@ -299,7 +343,7 @@ app.get("/api/request-status/:token",async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Status konnte nicht geladen werden."});}
 });
 
-app.post("/api/requests/:id/claim",auth,async(req,res)=>{
+app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
  try{
   const id=Number(req.params.id);
   let request,providerCompany="";
@@ -331,7 +375,7 @@ app.post("/api/requests/:id/claim",auth,async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht übernommen werden."});}
 });
 
-app.post("/api/request-status/:token/review",async(req,res)=>{
+app.post("/api/request-status/:token/review",reviewLimit,async(req,res)=>{
  try{
   const token=String(req.params.token||"");
   const rating=Number(req.body.rating);
