@@ -45,6 +45,22 @@ const claimLimit=rateLimit({windowMs:15*60*1000,max:30,keyPrefix:"claim"});
 
 
 
+async function sendEmail({to,subject,html}){
+ const recipient=String(to||"").trim(),apiKey=String(process.env.RESEND_API_KEY||"").trim(),from=String(process.env.RESEND_FROM||"").trim();
+ if(!recipient||!apiKey||!from)return false;
+ try{const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":"Bearer "+apiKey,"Content-Type":"application/json"},body:JSON.stringify({from,to:[recipient],subject,html})});if(!response.ok){console.error("Resend:",await response.text());return false}return true}catch(e){console.error("E-Mail Versand:",e);return false}
+}
+function statusUrl(token){return (String(process.env.APP_URL||"https://anfragepro.onrender.com").replace(/\/$/,""))+"/?request="+encodeURIComponent(String(token||""))}
+async function sendOfferEmail(request,offer,providerCompany){
+ const price=offer.price_min!=null&&offer.price_max!=null?offer.price_min+"–"+offer.price_max+" €":offer.price_min!=null?offer.price_min+" €":offer.price_max!=null?"bis "+offer.price_max+" €":"Preis auf Anfrage";
+ const html="<div style=\"font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0e315f\"><h2>Du hast ein neues Angebot erhalten.</h2><p>Ein Dienstleister hat ein konkretes Angebot gesendet.</p><p><strong>"+String(request.service||request.service_type||"Anfrage")+"</strong><br>"+String(request.place||"")+"</p><p><strong>Dienstleister:</strong> "+String(providerCompany||"Dienstleister")+"</p><p><strong>Preis:</strong> "+price+"</p><p><a href=\""+statusUrl(request.request_token)+"\">Angebot ansehen →</a></p></div>";
+ return sendEmail({to:request.email,subject:"AnfragePro: Neues Angebot erhalten",html});
+}
+async function sendOfferAcceptedEmail(request,providerEmail){
+ const html="<div style=\"font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0e315f\"><h2>Der Kunde hat dein Angebot angenommen.</h2><p>Dein Angebot für <strong>"+String(request.service||request.service_type||"Anfrage")+"</strong> wurde angenommen.</p><p>Kunde: "+String(request.name||"Kunde")+" · "+String(request.phone||"")+"</p><p><a href=\""+statusUrl(request.request_token)+"\">Anfrage öffnen →</a></p></div>";
+ return sendEmail({to:providerEmail,subject:"AnfragePro: Angebot angenommen",html});
+}
+
 async function sendCustomerClaimEmail(request){
   const to=String(request?.email||"").trim();
   const apiKey=String(process.env.RESEND_API_KEY||"").trim();
