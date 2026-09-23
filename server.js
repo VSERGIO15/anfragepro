@@ -245,10 +245,34 @@ app.get("/api/request-status/:token",async(req,res)=>{
  try{
   const token=String(req.params.token||"");
   let r;
-  if(useDb) r=(await pool.query("SELECT service_type,service,place,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
-  else r=read().requests.find(x=>x.request_token===token);
+  if(useDb) r=(await pool.query(`
+   SELECT r.service_type,r.service,r.place,r.status,r.provider_id,
+          u.company AS provider_company,u.phone AS provider_phone,
+          u.city AS provider_city,u.services AS provider_services,
+          u.description AS provider_description
+   FROM requests r
+   LEFT JOIN users u ON u.id=r.provider_id
+   WHERE r.request_token=$1
+  `,[token])).rows[0];
+  else{
+   const d=read();
+   r=d.requests.find(x=>x.request_token===token);
+   if(r&&r.provider_id){
+    const u=d.users.find(x=>Number(x.id)===Number(r.provider_id))||{};
+    r={...r,provider_company:u.company||"",provider_phone:u.phone||"",provider_city:u.city||"",provider_services:u.services||"",provider_description:u.description||""};
+   }
+  }
   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
-  res.json({service_type:r.service_type,service:r.service,place:r.place,status:r.status,claimed:!!r.provider_id});
+  res.json({
+   service_type:r.service_type,service:r.service,place:r.place,status:r.status,claimed:!!r.provider_id,
+   provider:r.provider_id?{
+    company:r.provider_company||"Dienstleister",
+    phone:r.provider_phone||"",
+    city:r.provider_city||"",
+    services:r.provider_services||"",
+    description:r.provider_description||""
+   }:null
+  });
  }catch(e){console.error(e);res.status(500).json({error:"Status konnte nicht geladen werden."});}
 });
 
