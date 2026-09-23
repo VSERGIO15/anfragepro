@@ -683,6 +683,28 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-hero-art{position:relative;isolation:isolate}
 .pro-hero-art:before{display:none}
 .pro-hero-art:after{content:"";position:absolute;z-index:3;inset:0;border-radius:inherit;box-shadow:0 0 28px #22d3ee3d,0 0 60px #22d3ee1c;pointer-events:none}
+
+/* Premium trust strip below hero */
+.pro-trust-panel{margin-top:55px;background:#0e315f;border:0;border-radius:28px;overflow:hidden}
+.pro-trust-panel .wrap{display:block;padding:0}
+.pro-trust-panel-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px;border-bottom:1px solid #ffffff1f}
+.pro-trust-panel-head span{font-size:9px;font-weight:900;letter-spacing:1.6px;color:#9fb2ca}
+.pro-trust-panel-head strong{font-size:15px;color:#fff;letter-spacing:-.2px}
+.pro-trust-items{display:grid;grid-template-columns:repeat(4,1fr)}
+.pro-trust-items>div{min-height:104px;padding:18px 20px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid #ffffff1f}
+.pro-trust-items>div:last-child{border-right:0}
+.pro-trust-items b{font-size:9px;color:#7fe7d0;letter-spacing:1px;margin-bottom:7px}
+.pro-trust-items span{font-size:14px;font-weight:900;color:#fff;letter-spacing:.5px}
+.pro-trust-items small{margin-top:4px;color:#aebed0;font-size:10px;line-height:1.35}
+@media(max-width:650px){
+.pro-trust-panel{margin-top:28px;border-radius:22px}
+.pro-trust-panel-head{padding:17px 18px;display:block}
+.pro-trust-panel-head strong{display:block;margin-top:4px;font-size:16px}
+.pro-trust-items{grid-template-columns:1fr 1fr}
+.pro-trust-items>div{min-height:92px;padding:15px 16px;border-right:1px solid #ffffff1f;border-bottom:1px solid #ffffff1f}
+.pro-trust-items>div:nth-child(2n){border-right:0}
+.pro-trust-items>div:nth-last-child(-n+2){border-bottom:0}
+}
 </style></head>
 <body>
 <div id="home">
@@ -719,7 +741,15 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 </div>
 </section>
 
-<section class="pro-marquee"><div class="wrap"><span>ANFRAGEPRO</span><i>●</i><span>LOKAL</span><i>●</i><span>DIREKT</span><i>●</i><span>TRANSPARENT</span><i>●</i><span>ANFRAGEPRO</span></div></section>
+<section class="pro-marquee pro-trust-panel"><div class="wrap">
+<div class="pro-trust-panel-head"><span>ANFRAGEPRO · AUF EINEN BLICK</span><strong>Einfach starten. Klar weiter.</strong></div>
+<div class="pro-trust-items">
+<div><b>01</b><span>LOKAL</span><small>passende Dienstleister</small></div>
+<div><b>02</b><span>DIREKT</span><small>Kontakt nach Übernahme</small></div>
+<div><b>03</b><span>TRANSPARENT</span><small>klarer Status deiner Anfrage</small></div>
+<div><b>04</b><span>KOSTENLOS</span><small>Anfrage für Kunden</small></div>
+</div>
+</div></section>
 <section class="pro-proof"><div class="wrap">
 <div class="pro-proof-intro"><span>02 / WARUM ANFRAGEPRO</span><h2>Weniger suchen.<br><i>Mehr Klarheit.</i></h2><p>Von der ersten Beschreibung bis zum direkten Kontakt bleibt sichtbar, was als Nächstes passiert.</p></div>
 <div class="pro-proof-grid">
