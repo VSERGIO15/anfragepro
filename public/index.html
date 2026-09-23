@@ -568,6 +568,19 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
   .pro-client-step p{font-size:13px;line-height:1.45}
   .pro-client-step:not(:last-child):after{content:"↓";position:absolute;left:33px;bottom:-13px;z-index:3;width:12px;height:16px;font-size:15px;line-height:16px;color:#16846b;font-weight:900}
 }
+
+/* Provider section — clearer product preview */
+.preview-top i{font-style:normal;color:#16846b}
+.preview-kicker{display:block;font-size:8px;color:#8998a8;letter-spacing:1.2px;font-weight:900;margin-bottom:4px}
+.preview-match-tag{display:inline-block;margin-top:12px;padding:7px 9px;border-radius:999px;background:#e8f7f1;color:#16846b;font-size:9px;font-weight:900;letter-spacing:.3px}
+@media(max-width:650px){
+  .pro-provider-section{padding:62px 0}
+  .pro-provider-inner{gap:28px}
+  .pro-provider-section h2{font-size:38px;letter-spacing:-2px}
+  .pro-provider-section p{font-size:14px;line-height:1.5}
+  .pro-dashboard-preview{padding:17px;border-radius:21px}
+  .preview-count{margin:22px 0 13px}
+}
 </style></head>
 <body>
 <div id="home">
@@ -650,7 +663,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 
 <section id="for-providers" class="pro-provider-section"><div class="wrap pro-provider-inner">
 <div><span class="pro-overline">FÜR DIENSTLEISTER</span><h2>Weniger suchen.<br><i>Mehr passende Aufträge.</i></h2><p>Pflege dein Profil, sieh neue Anfragen und verwalte den Status deiner Aufträge direkt in deinem Dashboard.</p><a class="pro-dark-btn" href="#register" onclick="view('register');return false">Als Dienstleister starten <b>→</b></a></div>
-<div class="pro-dashboard-preview"><div class="preview-top"><span>ANFRAGEPRO / DASHBOARD</span><i>●</i></div><div class="preview-count"><strong>Neue Anfrage</strong><span>1</span></div><div class="preview-match"><span>✓</span><div><b>Fensterreinigung</b><small>Gifhorn · Ort passt · Leistung passt</small></div><em>→</em></div><div class="preview-line"></div><div class="preview-status"><span>AUFTRAG</span><b>Kontakt aufgenommen</b></div></div>
+<div class="pro-dashboard-preview"><div class="preview-top"><span>ANFRAGEPRO / DASHBOARD</span><i>● LIVE</i></div><div class="preview-count"><div><small class="preview-kicker">HEUTE</small><strong>Neue Anfrage</strong></div><span>1</span></div><div class="preview-match"><span>✓</span><div><b>Fensterreinigung</b><small>Gifhorn · Ort passt · Leistung passt</small></div><em>→</em></div><div class="preview-match-tag">✓ PASSEND ZU DEINEM PROFIL</div><div class="preview-line"></div><div class="preview-status"><span>AUFTRAG</span><b>Kontakt aufgenommen</b></div></div>
 </div></section>
 
 <section class="pro-final"><div class="wrap"><div class="pro-final-card"><div><span>✦ ANFRAGEPRO · FÜR DEINEN AUFTRAG</span><h2>Bereit für den<br><i>nächsten Schritt?</i></h2><p>Erstelle deine Anfrage kostenlos. Beschreibe kurz, was du brauchst – den Rest kannst du direkt über AnfragePro erledigen.</p><div class="pro-final-points"><span>✓ Kostenlos starten</span><span>✓ Lokal suchen</span><span>✓ Direkt zum Kontakt</span></div></div><button onclick="openCustomerRequest()">Anfrage erstellen <b>↗</b></button></div></div></section>
