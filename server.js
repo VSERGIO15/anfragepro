@@ -510,6 +510,24 @@ app.post("/api/request-status/:token/messages",async(req,res)=>{
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Nachricht konnte nicht gesendet werden."});}
 });
+app.post("/api/request-status/:token/cancel",async(req,res)=>{
+ try{
+  const token=String(req.params.token||"");
+  let r;
+  if(useDb)r=(await pool.query("SELECT id,status FROM requests WHERE request_token=$1",[token])).rows[0];
+  else r=read().requests.find(x=>x.request_token===token);
+  if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+  if(["completed","cancelled"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr storniert werden."});
+  if(useDb){
+   await pool.query("UPDATE requests SET status='cancelled' WHERE id=$1",[r.id]);
+   await pool.query("UPDATE request_offers SET status='cancelled' WHERE request_id=$1",[r.id]);
+  }else{
+   const d=read(),rq=d.requests.find(x=>Number(x.id)===Number(r.id));rq.status="cancelled";
+   const o=(d.offers||[]).find(x=>Number(x.request_id)===Number(r.id));if(o)o.status="cancelled";write(d);
+  }
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht storniert werden."});}
+});
 app.post("/api/request-status/:token/review",reviewLimit,async(req,res)=>{
  try{
   const token=String(req.params.token||"");
