@@ -668,6 +668,11 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 #dash .phone-field input,#dash .profile-field input,#dash .profile-field textarea{position:relative;z-index:2;width:100%;margin:0!important;border:0!important;border-radius:11px!important;background:transparent!important}
 @keyframes phoneRing{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){#dash .phone-field:before{animation:none}}
+.pro-main-btn{position:relative;isolation:isolate;overflow:hidden}
+.pro-main-btn:before{content:"";position:absolute;z-index:-1;inset:-70%;background:conic-gradient(from 0deg,transparent 0deg,transparent 320deg,#ffd9ea 342deg,#ff77b7 354deg,#fff 359deg,#ffd9ea 360deg);animation:proCtaRing 2.8s linear infinite}
+.pro-main-btn:after{content:"";position:absolute;z-index:-1;inset:2px;border-radius:inherit;background:#ffb703}
+@keyframes proCtaRing{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.pro-main-btn:before{animation:none}}
 </style></head>
 <body>
 <div id="home">
