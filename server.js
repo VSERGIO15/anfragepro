@@ -97,6 +97,17 @@ async function dbInit(){
   comment TEXT DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL
  );
+ CREATE TABLE IF NOT EXISTS request_offers(
+  id BIGSERIAL PRIMARY KEY,
+  request_id BIGINT UNIQUE NOT NULL,
+  provider_id BIGINT NOT NULL,
+  price_min NUMERIC(10,2),
+  price_max NUMERIC(10,2),
+  availability TEXT DEFAULT '',
+  message TEXT DEFAULT '',
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL
+ );
  CREATE TABLE IF NOT EXISTS requests(
   id BIGINT PRIMARY KEY,
   user_id BIGINT,
@@ -373,6 +384,68 @@ app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht übernommen werden."});}
+});
+
+app.post("/api/requests/:id/offer",auth,async(req,res)=>{
+ try{
+  const id=Number(req.params.id);
+  const priceMin=req.body.price_min===""||req.body.price_min==null?null:Number(req.body.price_min);
+  const priceMax=req.body.price_max===""||req.body.price_max==null?null:Number(req.body.price_max);
+  const availability=String(req.body.availability||"").trim().slice(0,120);
+  const message=String(req.body.message||"").trim().slice(0,1000);
+  if(priceMin!==null&&(!Number.isFinite(priceMin)||priceMin<0))return res.status(400).json({error:"Ungültiger Mindestpreis."});
+  if(priceMax!==null&&(!Number.isFinite(priceMax)||priceMax<0))return res.status(400).json({error:"Ungültiger Höchstpreis."});
+  if(priceMin!==null&&priceMax!==null&&priceMax<priceMin)return res.status(400).json({error:"Der Höchstpreis darf nicht kleiner sein."});
+  if(!availability&&!message&&priceMin===null&&priceMax===null)return res.status(400).json({error:"Bitte mindestens Preis, Verfügbarkeit oder Nachricht angeben."});
+  if(useDb){
+   const r=(await pool.query("SELECT provider_id,status FROM requests WHERE id=$1",[id])).rows[0];
+   if(!r)return res.status(404).json({error:"Nicht gefunden"});
+   if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
+   await pool.query("INSERT INTO request_offers(request_id,provider_id,price_min,price_max,availability,message,status,created_at) VALUES($1,$2,$3,$4,$5,$6,'pending',NOW()) ON CONFLICT(request_id) DO UPDATE SET price_min=EXCLUDED.price_min,price_max=EXCLUDED.price_max,availability=EXCLUDED.availability,message=EXCLUDED.message,status='pending',created_at=NOW()",[id,req.session.userId,priceMin,priceMax,availability,message]);
+  }else{
+   const d=read(),r=d.requests.find(x=>Number(x.id)===id);
+   if(!r)return res.status(404).json({error:"Nicht gefunden"});
+   if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
+   d.offers=d.offers||[];
+   const old=d.offers.find(x=>Number(x.request_id)===id);
+   const offer={id:old?.id||Date.now(),request_id:id,provider_id:req.session.userId,price_min:priceMin,price_max:priceMax,availability,message,status:"pending",created_at:new Date().toISOString()};
+   if(old)Object.assign(old,offer);else d.offers.push(offer);write(d);
+  }
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Angebot konnte nicht gespeichert werden."});}
+});
+
+app.get("/api/request-status/:token/offer",async(req,res)=>{
+ try{
+  const token=String(req.params.token||"");
+  let o;
+  if(useDb)o=(await pool.query("SELECT o.price_min,o.price_max,o.availability,o.message,o.status,o.created_at,u.company,u.phone,u.city,u.services,u.description FROM request_offers o JOIN requests r ON r.id=o.request_id LEFT JOIN users u ON u.id=o.provider_id WHERE r.request_token=$1",[token])).rows[0];
+  else{
+   const d=read(),r=d.requests.find(x=>x.request_token===token); o=r?(d.offers||[]).find(x=>Number(x.request_id)===Number(r.id)):null;
+   if(o){const u=d.users.find(x=>Number(x.id)===Number(o.provider_id))||{};o={...o,company:u.company||"Dienstleister",phone:u.phone||"",city:u.city||"",services:u.services||"",description:u.description||""}}
+  }
+  if(!o)return res.json({offer:null});
+  res.json({offer:{price_min:o.price_min,price_max:o.price_max,availability:o.availability||"",message:o.message||"",status:o.status,provider:{company:o.company||"Dienstleister",phone:o.phone||"",city:o.city||"",services:o.services||"",description:o.description||""}}});
+ }catch(e){console.error(e);res.status(500).json({error:"Angebot konnte nicht geladen werden."});}
+});
+
+app.post("/api/request-status/:token/offer/accept",async(req,res)=>{
+ try{
+  const token=String(req.params.token||"");
+  if(useDb){
+   const r=(await pool.query("SELECT id,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
+   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   const o=(await pool.query("SELECT id FROM request_offers WHERE request_id=$1",[r.id])).rows[0];
+   if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
+   await pool.query("UPDATE request_offers SET status='accepted' WHERE request_id=$1",[r.id]);
+   await pool.query("UPDATE requests SET status='accepted' WHERE id=$1",[r.id]);
+  }else{
+   const d=read(),r=d.requests.find(x=>x.request_token===token); if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   const o=(d.offers||[]).find(x=>Number(x.request_id)===Number(r.id)); if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
+   o.status="accepted";r.status="accepted";write(d);
+  }
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Angebot konnte nicht angenommen werden."});}
 });
 
 app.post("/api/request-status/:token/review",reviewLimit,async(req,res)=>{
