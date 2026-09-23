@@ -64,6 +64,13 @@ async function dbInit(){
   created_at TIMESTAMPTZ NOT NULL,
   request_token TEXT UNIQUE
  );
+ CREATE TABLE IF NOT EXISTS request_reviews(
+  id BIGSERIAL PRIMARY KEY,
+  request_id BIGINT UNIQUE NOT NULL,
+  rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+  comment TEXT DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL
+ );
  CREATE TABLE IF NOT EXISTS requests(
   id BIGINT PRIMARY KEY,
   user_id BIGINT,
@@ -263,8 +270,24 @@ app.get("/api/request-status/:token",async(req,res)=>{
    }
   }
   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+  let review=null,providerRating=null;
+  if(useDb){
+   review=(await pool.query("SELECT rating,comment,created_at FROM request_reviews WHERE request_id=(SELECT id FROM requests WHERE request_token=$1)",[token])).rows[0]||null;
+   if(r.provider_id){
+    providerRating=(await pool.query("SELECT ROUND(AVG(rr.rating)::numeric,1) AS avg, COUNT(*)::int AS count FROM request_reviews rr JOIN requests rq ON rq.id=rr.request_id WHERE rq.provider_id=$1",[r.provider_id])).rows[0];
+   }
+  }else{
+   const d=read();
+   const rr=(d.reviews||[]).find(x=>Number(x.request_id)===Number(r.id));
+   review=rr||null;
+   if(r.provider_id){
+    const list=(d.reviews||[]).filter(x=>{const rq=d.requests.find(q=>Number(q.id)===Number(x.request_id));return rq&&Number(rq.provider_id)===Number(r.provider_id)});
+    providerRating=list.length?{avg:(list.reduce((s,x)=>s+Number(x.rating),0)/list.length).toFixed(1),count:list.length}:null;
+   }
+  }
   res.json({
    service_type:r.service_type,service:r.service,place:r.place,status:r.status,claimed:!!r.provider_id,
+   review,providerRating,
    provider:r.provider_id?{
     company:r.provider_company||"Dienstleister",
     phone:r.provider_phone||"",
@@ -306,6 +329,31 @@ app.post("/api/requests/:id/claim",auth,async(req,res)=>{
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht übernommen werden."});}
+});
+
+app.post("/api/request-status/:token/review",async(req,res)=>{
+ try{
+  const token=String(req.params.token||"");
+  const rating=Number(req.body.rating);
+  const comment=String(req.body.comment||"").trim().slice(0,1000);
+  if(!Number.isInteger(rating)||rating<1||rating>5)return res.status(400).json({error:"Bitte eine Bewertung von 1 bis 5 Sternen wählen."});
+  let r;
+  if(useDb)r=(await pool.query("SELECT id,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
+  else r=read().requests.find(x=>x.request_token===token);
+  if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+  if(r.status!=="completed")return res.status(400).json({error:"Bewertung ist erst nach Abschluss des Auftrags möglich."});
+  if(!r.provider_id)return res.status(400).json({error:"Kein Dienstleister zugeordnet."});
+  if(useDb){
+   const exists=await pool.query("SELECT id FROM request_reviews WHERE request_id=$1",[r.id]);
+   if(exists.rowCount)return res.status(409).json({error:"Diese Anfrage wurde bereits bewertet."});
+   await pool.query("INSERT INTO request_reviews(request_id,rating,comment,created_at) VALUES($1,$2,$3,NOW())",[r.id,rating,comment]);
+  }else{
+   const d=read();d.reviews=d.reviews||[];
+   if(d.reviews.some(x=>Number(x.request_id)===Number(r.id)))return res.status(409).json({error:"Diese Anfrage wurde bereits bewertet."});
+   d.reviews.push({id:Date.now(),request_id:r.id,rating,comment,created_at:new Date().toISOString()});write(d);
+  }
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Bewertung konnte nicht gespeichert werden."});}
 });
 
 app.patch("/api/requests/:id",auth,async(req,res)=>{
