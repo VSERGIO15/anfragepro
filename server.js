@@ -113,8 +113,28 @@ app.post("/api/login",async(req,res)=>{
   const password=String(req.body.password||"");
   if(!u)return res.status(401).json({error:"E-Mail nicht gefunden."});
   if(!u.password_hash||!(await bcrypt.compare(password,u.password_hash)))return res.status(401).json({error:"Passwort falsch."});
-  req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));res.json({ok:true,company:u.company});
+  req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));const tokenData=String(u.id)+"."+Date.now();const token=Buffer.from(tokenData+"."+crypto.createHmac("sha256",process.env.SESSION_SECRET||"change-this-secret").update(tokenData).digest("hex")).toString("base64url");res.json({ok:true,company:u.company,remember_token:token});
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler beim Login."});}
+});
+
+app.get("/api/restore-session",async(req,res)=>{
+ try{
+  const token=String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
+  const raw=Buffer.from(token,"base64url").toString("utf8");
+  const parts=raw.split(".");
+  if(parts.length!==3)return res.status(401).json({error:"Keine gespeicherte Anmeldung."});
+  const userId=parts[0],issued=Number(parts[1]),sig=parts[2];
+  if(!userId||!issued||Date.now()-issued>1000*60*60*24*30)return res.status(401).json({error:"Gespeicherte Anmeldung abgelaufen."});
+  const tokenData=userId+"."+issued;
+  const expected=crypto.createHmac("sha256",process.env.SESSION_SECRET||"change-this-secret").update(tokenData).digest("hex");
+  if(!crypto.timingSafeEqual(Buffer.from(sig),Buffer.from(expected)))return res.status(401).json({error:"Ungültige Anmeldung."});
+  let u;
+  if(useDb)u=(await pool.query("SELECT id,email,company FROM users WHERE id=$1",[userId])).rows[0];
+  else u=read().users.find(x=>String(x.id)===String(userId));
+  if(!u)return res.status(401).json({error:"Benutzer nicht gefunden."});
+  req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
+  res.json({ok:true,company:u.company});
+ }catch(e){console.error(e);res.status(401).json({error:"Gespeicherte Anmeldung konnte nicht wiederhergestellt werden."});}
 });
 
 app.post("/api/logout",(req,res)=>req.session.destroy(()=>res.json({ok:true})));
