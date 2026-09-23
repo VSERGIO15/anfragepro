@@ -209,6 +209,12 @@ const upload=multer({
  }
 });
 
+async function isAdmin(req){
+ if(!req.session.userId)return false;
+ const adminEmail=String(process.env.ADMIN_EMAIL||"").trim().toLowerCase(); if(!adminEmail)return false;
+ if(useDb){const u=(await pool.query("SELECT email FROM users WHERE id=$1",[req.session.userId])).rows[0];return !!u&&String(u.email).toLowerCase()===adminEmail}
+ const u=read().users.find(x=>Number(x.id)===Number(req.session.userId));return !!u&&String(u.email).toLowerCase()===adminEmail;
+}
 function auth(req,res,next){if(!req.session.userId)return res.status(401).json({error:"Nicht angemeldet"});next();}
 
 app.get("/api/provider-portfolio/:id/image",async(req,res)=>{
@@ -371,6 +377,23 @@ app.patch("/api/profile",auth,async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Profil konnte nicht gespeichert werden."});}
 });
 
+app.get("/api/admin/stats",auth,async(req,res)=>{
+ try{if(!(await isAdmin(req)))return res.status(403).json({error:"Kein Admin-Zugriff."});
+  let s;
+  if(useDb){
+   s=(await pool.query("SELECT COUNT(*)::int AS requests,COUNT(*) FILTER(WHERE status='new')::int AS new_requests,COUNT(*) FILTER(WHERE status='accepted')::int AS accepted_requests,COUNT(*) FILTER(WHERE status='completed')::int AS completed_requests,COUNT(*) FILTER(WHERE status='cancelled')::int AS cancelled_requests FROM requests")).rows[0];
+   const u=(await pool.query("SELECT COUNT(*)::int AS providers,COUNT(*) FILTER(WHERE email_verified=true)::int AS verified_providers FROM users")).rows[0];s={...s,...u};
+  }else{const d=read(),rs=d.requests||[],us=d.users||[];s={requests:rs.length,new_requests:rs.filter(x=>x.status==="new").length,accepted_requests:rs.filter(x=>x.status==="accepted").length,completed_requests:rs.filter(x=>x.status==="completed").length,cancelled_requests:rs.filter(x=>x.status==="cancelled").length,providers:us.length,verified_providers:us.filter(x=>x.email_verified).length}}
+  res.json(s);
+ }catch(e){console.error(e);res.status(500).json({error:"Statistik konnte nicht geladen werden."})}
+});
+app.get("/api/admin/requests",auth,async(req,res)=>{
+ try{if(!(await isAdmin(req)))return res.status(403).json({error:"Kein Admin-Zugriff."});let rows;
+  if(useDb)rows=(await pool.query("SELECT id,service,service_type,place,status,provider_id,created_at FROM requests ORDER BY id DESC LIMIT 100")).rows;
+  else rows=read().requests.slice().sort((a,b)=>b.id-a.id).slice(0,100).map(r=>({id:r.id,service:r.service,service_type:r.service_type,place:r.place,status:r.status,provider_id:r.provider_id,created_at:r.created_at}));
+  res.json(rows);
+ }catch(e){res.status(500).json({error:"Anfragen konnten nicht geladen werden."})}
+});
 app.get("/api/requests",auth,async(req,res)=>{
  try{
   let me;
