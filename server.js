@@ -109,6 +109,8 @@ async function dbInit(){
   id BIGSERIAL PRIMARY KEY,
   provider_id BIGINT NOT NULL,
   image_url TEXT NOT NULL,
+  image_data BYTEA,
+  mime_type TEXT DEFAULT 'image/jpeg',
   created_at TIMESTAMPTZ NOT NULL
  );
  CREATE TABLE IF NOT EXISTS request_offers(
@@ -141,6 +143,8 @@ async function dbInit(){
   created_at TIMESTAMPTZ NOT NULL
  );
  `);
+ await pool.query("ALTER TABLE provider_portfolio ADD COLUMN IF NOT EXISTS image_data BYTEA");
+ await pool.query("ALTER TABLE provider_portfolio ADD COLUMN IF NOT EXISTS mime_type TEXT DEFAULT 'image/jpeg'");
  await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS request_token TEXT UNIQUE");
  await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS customer_claim_notified_at TIMESTAMPTZ");
  const count=(await pool.query("SELECT COUNT(*)::int AS n FROM users")).rows[0].n;
@@ -184,12 +188,22 @@ const upload=multer({
 
 function auth(req,res,next){if(!req.session.userId)return res.status(401).json({error:"Nicht angemeldet"});next();}
 
+app.get("/api/provider-portfolio/:id/image",async(req,res)=>{
+ try{
+  const id=Number(req.params.id);let row;
+  if(useDb)row=(await pool.query("SELECT image_data,mime_type,image_url FROM provider_portfolio WHERE id=$1",[id])).rows[0];
+  else{const d=read(),p=(d.provider_portfolio||[]).find(x=>Number(x.id)===id);if(p&&p.image_url){const file=path.join(__dirname,p.image_url.replace(/^\/uploads\//,""));if(fs.existsSync(file))return res.sendFile(file)}}
+  if(!row)return res.status(404).end();
+  if(row.image_data){res.setHeader("Content-Type",row.mime_type||"image/jpeg");return res.send(row.image_data)}
+  res.status(404).end();
+ }catch(e){console.error(e);res.status(500).end();}
+});
 app.get("/api/provider-profile/:id",async(req,res)=>{
  try{
   const id=Number(req.params.id);let u,photos=[];
   if(useDb){
    u=(await pool.query("SELECT id,company,phone,city,services,description FROM users WHERE id=$1",[id])).rows[0];
-   photos=(await pool.query("SELECT id,image_url FROM provider_portfolio WHERE provider_id=$1 ORDER BY id DESC",[id])).rows;
+   photos=(await pool.query("SELECT id,image_url,mime_type,image_data FROM provider_portfolio WHERE provider_id=$1 ORDER BY id DESC",[id])).rows.map(x=>({id:x.id,image_url:x.image_data?"/api/provider-portfolio/"+x.id+"/image":x.image_url}));
   }else{
    const d=read();u=(d.users||[]).find(x=>Number(x.id)===id)||null;
    photos=(d.provider_portfolio||[]).filter(x=>Number(x.provider_id)===id).map(x=>({id:x.id,image_url:x.image_url}));
@@ -204,7 +218,7 @@ app.post("/api/provider-portfolio",auth,upload.array("photos",6),async(req,res)=
   if(useDb){
    const count=(await pool.query("SELECT COUNT(*)::int AS n FROM provider_portfolio WHERE provider_id=$1",[req.session.userId])).rows[0].n;
    if(count+files.length>6)return res.status(400).json({error:"Maximal 6 Arbeitsbeispiele erlaubt."});
-   for(const f of files)await pool.query("INSERT INTO provider_portfolio(provider_id,image_url,created_at) VALUES($1,$2,NOW())",[req.session.userId,"/uploads/"+f.filename]);
+   for(const f of files){const data=fs.readFileSync(f.path);await pool.query("INSERT INTO provider_portfolio(provider_id,image_url,image_data,mime_type,created_at) VALUES($1,$2,$3,$4,NOW())",[req.session.userId,"/api/provider-portfolio/IMAGE",data,f.mimetype]);if(fs.existsSync(f.path))fs.unlinkSync(f.path)}
   }else{
    const d=read();d.provider_portfolio=d.provider_portfolio||[];const own=d.provider_portfolio.filter(x=>Number(x.provider_id)===Number(req.session.userId));
    if(own.length+files.length>6)return res.status(400).json({error:"Maximal 6 Arbeitsbeispiele erlaubt."});
