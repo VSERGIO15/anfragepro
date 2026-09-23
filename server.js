@@ -97,6 +97,14 @@ async function dbInit(){
   comment TEXT DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL
  );
+ CREATE TABLE IF NOT EXISTS request_messages(
+  id BIGSERIAL PRIMARY KEY,
+  request_id BIGINT NOT NULL,
+  sender_role TEXT NOT NULL,
+  sender_name TEXT DEFAULT '',
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+ );
  CREATE TABLE IF NOT EXISTS request_offers(
   id BIGSERIAL PRIMARY KEY,
   request_id BIGINT UNIQUE NOT NULL,
@@ -448,6 +456,42 @@ app.post("/api/request-status/:token/offer/accept",async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Angebot konnte nicht angenommen werden."});}
 });
 
+app.get("/api/request-status/:token/messages",async(req,res)=>{
+ try{
+  const token=String(req.params.token||""); let r,rows=[];
+  if(useDb){
+   r=(await pool.query("SELECT id,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
+   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   rows=(await pool.query("SELECT sender_role,sender_name,message,created_at FROM request_messages WHERE request_id=$1 ORDER BY id ASC",[r.id])).rows;
+  }else{
+   const d=read();r=d.requests.find(x=>x.request_token===token);if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   rows=(d.messages||[]).filter(x=>Number(x.request_id)===Number(r.id)).sort((a,b)=>Number(a.id)-Number(b.id));
+  }
+  res.json({messages:rows});
+ }catch(e){console.error(e);res.status(500).json({error:"Chat konnte nicht geladen werden."});}
+});
+
+app.post("/api/request-status/:token/messages",async(req,res)=>{
+ try{
+  const token=String(req.params.token||"");const message=String(req.body.message||"").trim().slice(0,2000);
+  if(!message)return res.status(400).json({error:"Nachricht darf nicht leer sein."});
+  let r,role,name="";
+  if(useDb){
+   r=(await pool.query("SELECT id,status,provider_id,name FROM requests WHERE request_token=$1",[token])).rows[0];
+   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(!r.provider_id||!["accepted","contacted"].includes(String(r.status)))return res.status(403).json({error:"Chat ist nach Annahme des Auftrags verfügbar."});
+   if(req.session.userId&&Number(req.session.userId)===Number(r.provider_id)){role="provider";const u=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];name=u?.company||"Dienstleister"}
+   else{role="customer";name=r.name||"Kunde"}
+   await pool.query("INSERT INTO request_messages(request_id,sender_role,sender_name,message,created_at) VALUES($1,$2,$3,$4,NOW())",[r.id,role,name,message]);
+  }else{
+   const d=read();r=d.requests.find(x=>x.request_token===token);if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(!r.provider_id||!["accepted","contacted"].includes(String(r.status)))return res.status(403).json({error:"Chat ist nach Annahme des Auftrags verfügbar."});
+   if(req.session.userId&&Number(req.session.userId)===Number(r.provider_id)){role="provider";const u=d.users.find(x=>Number(x.id)===Number(req.session.userId))||{};name=u.company||"Dienstleister"}else{role="customer";name=r.name||"Kunde"}
+   d.messages=d.messages||[];d.messages.push({id:Date.now(),request_id:r.id,sender_role:role,sender_name:name,message,created_at:new Date().toISOString()});write(d);
+  }
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Nachricht konnte nicht gesendet werden."});}
+});
 app.post("/api/request-status/:token/review",reviewLimit,async(req,res)=>{
  try{
   const token=String(req.params.token||"");
