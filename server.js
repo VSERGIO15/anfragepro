@@ -541,12 +541,14 @@ app.post("/api/request-status/:token/offer/accept",async(req,res)=>{
  try{
   const token=String(req.params.token||"");
   if(useDb){
-   const r=(await pool.query("SELECT id,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
+   const r=(await pool.query("SELECT id,provider_id,name,phone,email,service,service_type,place,request_token FROM requests WHERE request_token=$1",[token])).rows[0];
    if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
    const o=(await pool.query("SELECT id FROM request_offers WHERE request_id=$1",[r.id])).rows[0];
    if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
    await pool.query("UPDATE request_offers SET status='accepted' WHERE request_id=$1",[r.id]);
    await pool.query("UPDATE requests SET status='accepted' WHERE id=$1",[r.id]);
+   const provider=(await pool.query("SELECT email FROM users WHERE id=$1",[r.provider_id])).rows[0];
+   await sendOfferAcceptedEmail(r,provider?.email);
   }else{
    const d=read(),r=d.requests.find(x=>x.request_token===token); if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
    const o=(d.offers||[]).find(x=>Number(x.request_id)===Number(r.id)); if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
