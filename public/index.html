@@ -464,7 +464,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-hero-grid{grid-template-columns:1fr 1.05fr!important;gap:34px!important}
 .pro-hero-art{min-height:500px!important;padding:0!important;overflow:hidden!important;background:#dbe7ef!important;border-radius:30px!important;position:relative}
 .pro-hero-art:before{display:none!important}.pro-hero-art:after{display:none!important}
-.pro-photo-main{position:absolute;inset:0;background-image:linear-gradient(180deg,rgba(14,49,95,.03),rgba(14,49,95,.48)),url('https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85');background-size:cover;background-position:center}
+.pro-photo-main{position:absolute;inset:0;border:3px solid #bffcff;border-radius:inherit;box-shadow:0 0 10px #bffcff,0 0 28px #22d3ee66,0 0 55px #22d3ee2b;background-image:linear-gradient(180deg,rgba(14,49,95,.03),rgba(14,49,95,.48)),url('https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85');background-size:cover;background-position:center}
 .pro-photo-main:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 48%,rgba(7,24,48,.72) 100%)}
 .pro-photo-copy{position:absolute;left:22px;right:22px;bottom:20px;color:#fff;z-index:3}
 .pro-photo-copy small{display:block;font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.78;margin-bottom:5px}
@@ -681,8 +681,8 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 @media(prefers-reduced-motion:reduce){.pro-hero h1 .led-word{animation:none;background-position:50% 0}}
 /* Moving cyan light around the hero photo */
 .pro-hero-art{position:relative;isolation:isolate}
-.pro-hero-art:before{content:"";position:absolute;z-index:5;inset:-3px;border-radius:inherit;border:2px solid #bffcff;box-shadow:0 0 8px #bffcff,0 0 22px #22d3ee55,0 0 42px #22d3ee22;pointer-events:none}
-.pro-hero-art:after{content:"";position:absolute;z-index:4;inset:-1px;border-radius:inherit;box-shadow:0 0 26px #22d3ee38,0 0 55px #22d3ee1c;pointer-events:none}
+.pro-hero-art:before{display:none}
+.pro-hero-art:after{content:"";position:absolute;z-index:3;inset:0;border-radius:inherit;box-shadow:0 0 28px #22d3ee3d,0 0 60px #22d3ee1c;pointer-events:none}
 </style></head>
 <body>
 <div id="home">
