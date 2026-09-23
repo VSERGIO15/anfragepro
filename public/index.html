@@ -862,5 +862,18 @@ window.addEventListener("load",async()=>{
   }catch(e){}
 });
 </script>
+
+<script>
+(function(){
+  function homeNav(selector,action){document.querySelectorAll(selector).forEach(el=>{el.style.cursor="pointer";el.addEventListener("click",action);el.setAttribute("role","link");el.setAttribute("tabindex","0");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();action()}})})}
+  homeNav(".pro-live-card,.pro-category-card",()=>openCustomerRequest());
+  homeNav(".pro-proof-card",()=>document.getElementById("how")?.scrollIntoView({behavior:"smooth"}));
+  homeNav(".pro-trust-items>div",()=>openCustomerRequest());
+  homeNav(".pro-client-step:nth-child(1)",()=>openCustomerRequest());
+  homeNav(".pro-client-step:nth-child(2)",()=>document.getElementById("for-providers")?.scrollIntoView({behavior:"smooth"}));
+  homeNav(".pro-client-step:nth-child(3)",()=>openCustomerRequest());
+  homeNav(".pro-dashboard-preview",()=>view("register"));
+})();
+</script>
 </body>
 </html>
