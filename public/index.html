@@ -705,6 +705,32 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-trust-items>div:nth-child(2n){border-right:0!important}
 .pro-trust-items>div:nth-last-child(-n+2){border-bottom:0!important}
 }
+
+/* Customer request status page */
+#requestStatusPage{max-width:760px;margin:26px auto 60px;padding:30px;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);border:1px solid #dfe5ec;border-radius:28px;box-shadow:0 28px 70px #14203312}
+.status-kicker{display:inline-flex;padding:7px 10px;border-radius:999px;background:#e8f7f1;color:#16846b;font-size:10px;font-weight:900;letter-spacing:1px}
+#requestStatusPage h1{font-size:clamp(34px,6vw,54px);line-height:1;letter-spacing:-2.2px;color:#0e315f;margin:18px 0 10px}
+.status-sub{color:#667085;line-height:1.5;margin:0 0 24px}
+.status-summary{background:#0e315f;color:#fff;border-radius:22px;padding:20px;margin-bottom:16px}
+.status-summary small{display:block;color:#9fb2ca;font-size:9px;font-weight:900;letter-spacing:1px;margin-bottom:6px}
+.status-summary strong{font-size:22px;display:block}
+.status-summary span{display:block;color:#c8d5e4;margin-top:5px;font-size:13px}
+.status-timeline{display:grid;gap:10px}
+.status-step{display:grid;grid-template-columns:42px 1fr;gap:13px;align-items:center;padding:14px 15px;border:1px solid #e4e9ef;border-radius:17px;background:#fff}
+.status-step .dot{width:34px;height:34px;border-radius:11px;background:#eef2f7;color:#7b8797;display:grid;place-items:center;font-weight:900}
+.status-step.active{border-color:#bfe8d9;background:#f4fcf8}
+.status-step.active .dot{background:#16846b;color:#fff}
+.status-step strong{display:block;color:#0e315f;font-size:14px}
+.status-step span{display:block;color:#7a8797;font-size:11px;margin-top:3px}
+.status-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.status-actions button{min-height:48px}
+.status-note{margin-top:15px;color:#8a96a5;font-size:11px;line-height:1.45}
+@media(max-width:650px){
+  #requestStatusPage{margin:12px 0 36px;padding:20px;border-radius:22px}
+  #requestStatusPage h1{font-size:37px}
+  .status-summary{padding:17px;border-radius:18px}
+  .status-step{padding:12px}
+}
 </style></head>
 <body>
 <div id="home">
@@ -825,6 +851,20 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 <div><label>Dein Name</label><input id="rn" placeholder="Vor- und Nachname" required></div><div><label>Telefon</label><input id="rphone" placeholder="z. B. 0151 12345678" required></div>
 <div class="full"><label>E-Mail</label><input id="remail" type="email" placeholder="Damit wir dich erreichen können" required></div>
 </div><button>Absenden</button></form><p id="rnotice"></p><div id="customerStatus" class="card" style="margin:14px 0 0;background:#f8fafc"></div></div>
+
+<div id="requestStatusPage" class="hide">
+  <span class="status-kicker">ANFRAGEPRO · DEINE ANFRAGE</span>
+  <h1>Deine Anfrage.</h1>
+  <p class="status-sub">Hier kannst du jederzeit sehen, wie weit deine Anfrage ist. Speichere diese Seite oder den Link aus deiner E-Mail.</p>
+  <div id="statusSummary" class="status-summary"></div>
+  <div id="statusTimeline" class="status-timeline"></div>
+  <div class="status-actions">
+    <button class="secondary" onclick="showHome()">Startseite</button>
+    <button onclick="openCustomerRequest()">Neue Anfrage erstellen</button>
+  </div>
+  <p class="status-note">Der Status wird automatisch aktualisiert, solange diese Seite geöffnet ist.</p>
+</div>
+
 <div id="dash" class="card hide"><div class="dashboard-label">DIENSTLEISTER · DEIN ARBEITSBEREICH</div><h2>Dein Dashboard</h2><span id="newCount" style="display:none"></span><p id="who" class="muted"></p>
 <div class="card" style="margin:16px 0 0;background:#f8fafc"><h3>Unternehmensprofil</h3><form onsubmit="saveProfile(event)"><div class="grid">
 <div><label>Firmenname</label><div class="profile-field"><input id="pc" required></div></div><div><label>Telefon</label><div class="profile-field"><input id="pp"></div></div>
@@ -836,9 +876,11 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 
 <script>
 const $=id=>document.getElementById(id);
-function showHome(){document.getElementById("home").classList.remove("hide");document.getElementById("app").classList.add("hide");["login","register","request","dash"].forEach(x=>document.getElementById(x).classList.add("hide"));window.scrollTo({top:0,behavior:"smooth"})}
-function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash()}
-function openCustomerRequest(){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$("request").classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"})}
+function showHome(){$("home").classList.remove("hide");$("app").classList.add("hide");["login","register","request","dash","requestStatusPage"].forEach(x=>$(x).classList.add("hide"));window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
+function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash()}
+function openCustomerRequest(){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage"].forEach(x=>$(x).classList.add("hide"));$("request").classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
+async function openCustomerStatus(token){if(!token)return;clearInterval(customerStatusTimer);customerStatusToken=token;$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$("requestStatusPage").classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"});await checkCustomerStatusPage();customerStatusTimer=setInterval(checkCustomerStatusPage,5000)}
+async function checkCustomerStatusPage(){try{const r=await api("/api/request-status/"+encodeURIComponent(customerStatusToken));const labels={new:["Anfrage erstellt","Deine Anfrage ist online."],contacted:["Kontakt aufgenommen","Der Dienstleister hat Kontakt aufgenommen."],accepted:["Auftrag angenommen","Ein Dienstleister hat deine Anfrage übernommen."],completed:["Auftrag abgeschlossen","Der Auftrag wurde als abgeschlossen markiert."]};const current=labels[r.status]||labels.new;$("statusSummary").innerHTML="<small>AKTUELLER STATUS</small><strong>"+current[0]+"</strong><span>"+(r.service||r.service_type||"Deine Anfrage")+" · "+(r.place||"")+"</span>";const order=["new","contacted","accepted","completed"],idx=Math.max(0,order.indexOf(r.status));$("statusTimeline").innerHTML=order.map((s,i)=>{const l=labels[s];const active=i<=idx;return "<div class=\"status-step "+(active?"active":"")+"\"><div class=\"dot\">"+(active?"✓":String(i+1).padStart(2,"0"))+"</div><div><strong>"+l[0]+"</strong><span>"+l[1]+"</span></div></div>"}).join("")}catch(e){$("statusSummary").innerHTML="<small>STATUS</small><strong>Anfrage nicht gefunden</strong><span>Bitte prüfe den Link aus deiner E-Mail.</span>";$("statusTimeline").innerHTML=""}}
 async function api(url,opt={}){const r=await fetch(url,opt),d=await r.json();if(!r.ok)throw Error(d.error||"Fehler");return d}
 async function register(e){e.preventDefault();try{await api("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:$("rc").value,email:$("re").value,password:$("rp").value})});$("rmsg").textContent="Konto erstellt.";view("dash")}catch(x){$("rmsg").textContent=x.message}}
 async function login(e){e.preventDefault();try{await api("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("le").value,password:$("lp").value})});$("lmsg").textContent="Erfolgreich eingeloggt.";view("dash")}catch(x){$("lmsg").textContent=x.message}}
@@ -856,6 +898,8 @@ async function loadDash(){try{const me=await api("/api/me");$("who").textContent
 </script>
 <script>
 window.addEventListener("load",async()=>{
+  const token=new URLSearchParams(location.search).get("request");
+  if(token){openCustomerStatus(token);return}
   try{
     await api("/api/me");
     view("dash");
