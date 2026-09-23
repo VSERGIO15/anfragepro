@@ -660,6 +660,14 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
   #dash #requests{gap:10px}
   #dash .req{padding:16px;border-radius:18px}
 }
+
+/* Animated pink ring around provider phone field */
+#dash .phone-field{position:relative;border-radius:14px;padding:1.5px;overflow:hidden;background:#e8edf3}
+#dash .phone-field:before{content:"";position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent 0deg,transparent 320deg,#ffd1e6 344deg,#ff8fc4 356deg,#ffd1e6 360deg);animation:phoneRing 2.8s linear infinite}
+#dash .phone-field:after{content:"";position:absolute;inset:1.5px;border-radius:12px;background:#f8fafc}
+#dash .phone-field input{position:relative;z-index:1;width:100%;margin:0!important;border:0!important;border-radius:12px!important;background:#f8fafc!important}
+@keyframes phoneRing{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#dash .phone-field:before{animation:none}}
 </style></head>
 <body>
 <div id="home">
@@ -772,7 +780,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 </div><button>Absenden</button></form><p id="rnotice"></p><div id="customerStatus" class="card" style="margin:14px 0 0;background:#f8fafc"></div></div>
 <div id="dash" class="card hide"><div class="dashboard-label">DIENSTLEISTER · DEIN ARBEITSBEREICH</div><h2>Dein Dashboard</h2><span id="newCount" style="display:none"></span><p id="who" class="muted"></p>
 <div class="card" style="margin:16px 0 0;background:#f8fafc"><h3>Unternehmensprofil</h3><form onsubmit="saveProfile(event)"><div class="grid">
-<div><label>Firmenname</label><input id="pc" required></div><div><label>Telefon</label><input id="pp"></div>
+<div><label>Firmenname</label><input id="pc" required></div><div><label>Telefon</label><div class="phone-field"><input id="pp"></div></div>
 <div><label>Stadt / Einsatzgebiet</label><input id="pcity" placeholder="z. B. Gifhorn"></div><div><label>Leistungen</label><input id="pservices" placeholder="z. B. Reinigung, Fensterreinigung"></div>
 <div class="full"><label>Beschreibung</label><textarea id="pdesc" placeholder="Kurzbeschreibung deines Unternehmens"></textarea></div>
 </div><button>Profil speichern</button></form><p id="pmsg"></p></div>
