@@ -800,7 +800,7 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 
 <script>
 const $=id=>document.getElementById(id);
-function showHome(){$("home").classList.remove("hide");$("app").classList.add("hide");window.scrollTo({top:0,behavior:"smooth"})}
+function showHome(){document.getElementById("home").classList.remove("hide");document.getElementById("app").classList.add("hide");["login","register","request","dash"].forEach(x=>document.getElementById(x).classList.add("hide"));window.scrollTo({top:0,behavior:"smooth"})}
 function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash()}
 function openCustomerRequest(){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$("request").classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"})}
 async function api(url,opt={}){const r=await fetch(url,opt),d=await r.json();if(!r.ok)throw Error(d.error||"Fehler");return d}
