@@ -19,6 +19,35 @@ const write=d=>fs.writeFileSync(DATA,JSON.stringify(d,null,2));
 const useDb=!!process.env.DATABASE_URL;
 const pool=useDb?new Pool({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:false}}):null;
 
+async function sendCustomerClaimEmail(request){
+  const to=String(request?.email||"").trim();
+  const apiKey=String(process.env.RESEND_API_KEY||"").trim();
+  const from=String(process.env.RESEND_FROM||"").trim();
+  if(!to||!apiKey||!from)return false;
+  const provider=String(request.provider_company||"Dienstleister").trim();
+  const subject="AnfragePro: Ein Dienstleister hat deine Anfrage übernommen";
+  const html=`<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0e315f">
+    <h2>Ein Dienstleister hat deine Anfrage übernommen.</h2>
+    <p>Deine Anfrage bei AnfragePro wurde übernommen. Du kannst jetzt direkt Kontakt aufnehmen.</p>
+    <div style="background:#f4f7fb;border-radius:14px;padding:16px;margin:20px 0">
+      <strong>${String(request.service||request.service_type||"Deine Anfrage")}</strong><br>
+      ${String(request.place||"")}
+    </div>
+    <p><strong>Dienstleister:</strong> ${provider}</p>
+    <p>Öffne deine Anfrage-Seite, um den aktuellen Status zu sehen.</p>
+    <p style="color:#667085;font-size:12px">AnfragePro · Lokal. Direkt. Transparent.</p>
+  </div>`;
+  try{
+    const response=await fetch("https://api.resend.com/emails",{
+      method:"POST",
+      headers:{"Authorization":"Bearer "+apiKey,"Content-Type":"application/json"},
+      body:JSON.stringify({from,to:[to],subject,html})
+    });
+    if(!response.ok){console.error("Resend:",await response.text());return false;}
+    return true;
+  }catch(e){console.error("E-Mail Versand:",e);return false;}
+}
+
 async function dbInit(){
  if(!useDb)return;
  await pool.query(`
@@ -54,6 +83,7 @@ async function dbInit(){
  );
  `);
  await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS request_token TEXT UNIQUE");
+ await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS customer_claim_notified_at TIMESTAMPTZ");
  const count=(await pool.query("SELECT COUNT(*)::int AS n FROM users")).rows[0].n;
  if(count===0){
   const d=read();
@@ -224,16 +254,30 @@ app.get("/api/request-status/:token",async(req,res)=>{
 app.post("/api/requests/:id/claim",auth,async(req,res)=>{
  try{
   const id=Number(req.params.id);
+  let request,providerCompany="";
   if(useDb){
-   const r=(await pool.query("SELECT * FROM requests WHERE id=$1",[id])).rows[0];
-   if(!r)return res.status(404).json({error:"Nicht gefunden"});
-   if(r.provider_id&&Number(r.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});
+   request=(await pool.query("SELECT * FROM requests WHERE id=$1",[id])).rows[0];
+   if(!request)return res.status(404).json({error:"Nicht gefunden"});
+   if(request.provider_id&&Number(request.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});
+   const provider=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];
+   providerCompany=provider?.company||"Dienstleister";
    await pool.query("UPDATE requests SET provider_id=$1 WHERE id=$2",[req.session.userId,id]);
+   request.provider_company=providerCompany;
+   if(!request.customer_claim_notified_at){
+    const sent=await sendCustomerClaimEmail(request);
+    if(sent)await pool.query("UPDATE requests SET customer_claim_notified_at=NOW() WHERE id=$1",[id]);
+   }
   }else{
    const d=read(),r=d.requests.find(x=>x.id===id);
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(r.provider_id&&r.provider_id!==req.session.userId)return res.status(409).json({error:"Anfrage bereits übernommen."});
-   r.provider_id=req.session.userId;write(d);
+   const provider=d.users.find(x=>x.id===req.session.userId)||{};
+   r.provider_id=req.session.userId;r.provider_company=provider.company||"Dienstleister";
+   if(!r.customer_claim_notified_at){
+    const sent=await sendCustomerClaimEmail(r);
+    if(sent)r.customer_claim_notified_at=new Date().toISOString();
+   }
+   write(d);
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht übernommen werden."});}
