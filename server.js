@@ -333,6 +333,24 @@ app.get("/api/request-status/:token",async(req,res)=>{
    }
   }
   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+  let matchingProviders=null;
+  if(!r.provider_id){
+   const norm=x=>String(x||"").trim().toLowerCase();
+   const place=norm(r.place),st=norm(r.service_type),sv=norm(r.service);
+   if(useDb){
+    const providers=(await pool.query("SELECT city,services FROM users")).rows;
+    matchingProviders=providers.filter(u=>{
+     const city=norm(u.city),services=norm(u.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+     return city&&place&&(place.includes(city)||city.includes(place))&&services.some(s=>s&&(st.includes(s)||sv.includes(s)||s.includes(st)||s.includes(sv)));
+    }).length;
+   }else{
+    const d=read();
+    matchingProviders=(d.users||[]).filter(u=>{
+     const city=norm(u.city),services=norm(u.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+     return city&&place&&(place.includes(city)||city.includes(place))&&services.some(s=>s&&(st.includes(s)||sv.includes(s)||s.includes(st)||s.includes(sv)));
+    }).length;
+   }
+  }
   let review=null,providerRating=null;
   if(useDb){
    review=(await pool.query("SELECT rating,comment,created_at FROM request_reviews WHERE request_id=(SELECT id FROM requests WHERE request_token=$1)",[token])).rows[0]||null;
@@ -350,7 +368,7 @@ app.get("/api/request-status/:token",async(req,res)=>{
   }
   res.json({
    service_type:r.service_type,service:r.service,place:r.place,status:r.status,claimed:!!r.provider_id,
-   review,providerRating,
+   review,providerRating,matchingProviders,
    provider:r.provider_id?{
     company:r.provider_company||"Dienstleister",
     phone:r.provider_phone||"",
