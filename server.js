@@ -61,6 +61,10 @@ async function sendOfferAcceptedEmail(request,providerEmail){
  return sendEmail({to:providerEmail,subject:"AnfragePro: Angebot angenommen",html});
 }
 
+async function sendVerificationEmail(user,token){
+ const link=statusUrl("").replace("/?request=","/verify-email?token=")+encodeURIComponent(token);
+ return sendEmail({to:user.email,subject:"AnfragePro: E-Mail-Adresse bestätigen",html:"<div style=\"font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0e315f\"><h2>E-Mail-Adresse bestätigen</h2><p>Bitte bestätige deine E-Mail-Adresse für dein AnfragePro-Dienstleisterkonto.</p><p><a href=\""+link+"\" style=\"display:inline-block;background:#0e315f;color:#fff;text-decoration:none;padding:13px 18px;border-radius:10px;font-weight:700\">E-Mail bestätigen →</a></p><p style=\"color:#667085;font-size:12px\">Der Link ist 24 Stunden gültig.</p></div>"});
+}
 async function sendCustomerClaimEmail(request){
   const to=String(request?.email||"").trim();
   const apiKey=String(process.env.RESEND_API_KEY||"").trim();
@@ -161,6 +165,9 @@ async function dbInit(){
  `);
  await pool.query("ALTER TABLE provider_portfolio ADD COLUMN IF NOT EXISTS image_data BYTEA");
  await pool.query("ALTER TABLE provider_portfolio ADD COLUMN IF NOT EXISTS mime_type TEXT DEFAULT 'image/jpeg'");
+ await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE");
+ await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token TEXT UNIQUE");
+ await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_expires TIMESTAMPTZ");
  await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS request_token TEXT UNIQUE");
  await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS customer_claim_notified_at TIMESTAMPTZ");
  const count=(await pool.query("SELECT COUNT(*)::int AS n FROM users")).rows[0].n;
@@ -257,6 +264,29 @@ app.delete("/api/provider-portfolio/:id",auth,async(req,res)=>{
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Bild konnte nicht gelöscht werden."});}
+});
+app.post("/api/email-verification/resend",auth,async(req,res)=>{
+ try{
+  let u;if(useDb)u=(await pool.query("SELECT id,email,company,email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];else u=read().users.find(x=>Number(x.id)===Number(req.session.userId));
+  if(!u)return res.status(404).json({error:"Konto nicht gefunden."});
+  if(u.email_verified)return res.json({ok:true,verified:true});
+  const token=crypto.randomBytes(32).toString("hex");
+  if(useDb)await pool.query("UPDATE users SET email_verification_token=$1,email_verification_expires=NOW()+INTERVAL '24 hours' WHERE id=$2",[token,u.id]);
+  else{const d=read(),x=d.users.find(q=>Number(q.id)===Number(u.id));x.email_verification_token=token;x.email_verification_expires=new Date(Date.now()+86400000).toISOString();write(d)}
+  await sendVerificationEmail(u,token);res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Bestätigungs-E-Mail konnte nicht gesendet werden."})}
+});
+app.get("/verify-email",async(req,res)=>{
+ try{
+  const token=String(req.query.token||"");if(!token)return res.status(400).send("Ungültiger Bestätigungslink.");
+  let u;
+  if(useDb)u=(await pool.query("SELECT id FROM users WHERE email_verification_token=$1 AND email_verification_expires>NOW()",[token])).rows[0];
+  else{const d=read();u=d.users.find(x=>x.email_verification_token===token&&new Date(x.email_verification_expires).getTime()>Date.now())}
+  if(!u)return res.status(400).send("<h2>Link ungültig oder abgelaufen.</h2><p>Bitte fordere in AnfragePro eine neue Bestätigungs-E-Mail an.</p>");
+  if(useDb)await pool.query("UPDATE users SET email_verified=TRUE,email_verification_token=NULL,email_verification_expires=NULL WHERE id=$1",[u.id]);
+  else{const d=read(),x=d.users.find(q=>Number(q.id)===Number(u.id));x.email_verified=true;x.email_verification_token=null;x.email_verification_expires=null;write(d)}
+  res.send("<div style='font-family:Arial;max-width:620px;margin:60px auto;padding:24px'><h2>E-Mail erfolgreich bestätigt ✓</h2><p>Du kannst jetzt zu AnfragePro zurückkehren und dich einloggen.</p><a href='/'>Zurück zu AnfragePro →</a></div>");
+ }catch(e){console.error(e);res.status(500).send("Bestätigung fehlgeschlagen.")}
 });
 app.post("/api/register",registerLimit,async(req,res)=>{
  try{
