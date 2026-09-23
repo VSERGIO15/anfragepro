@@ -433,21 +433,6 @@ app.get("/api/requests",auth,async(req,res)=>{
 });
 
 
-app.post("/api/ai-analyze-image",publicRequestLimit,upload.single("photo"),async(req,res)=>{
- try{
-  if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:"KI-Analyse ist noch nicht aktiviert. OPENAI_API_KEY fehlt."});
-  if(!req.file)return res.status(400).json({error:"Bitte zuerst ein Foto auswählen."});
-  const data=fs.readFileSync(req.file.path).toString("base64");
-  const mime=req.file.mimetype;
-  const prompt="Analysiere dieses Foto für eine deutsche Handwerker-/Dienstleistungsanfrage. Erkenne möglichst die Art der Arbeit und gib eine vorsichtige Schätzung ab, falls Fläche oder Umfang aus dem Bild sinnvoll abschätzbar sind. Niemals eine exakte Vermessung behaupten. Antworte ausschließlich als JSON mit den Feldern service_type, service, scope_estimate, description, confidence. service_type soll eine kurze Kategorie sein (z.B. Gartenbau, Reinigung, Handwerk), service eine konkrete Leistung, scope_estimate eine vorsichtige Angabe wie 'ca. 70–90 m²' oder leer, description eine kurze deutsche Beschreibung, confidence eine Zahl von 0 bis 1.";
-  const rr=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Authorization":"Bearer "+process.env.OPENAI_API_KEY,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OPENAI_VISION_MODEL||"gpt-5.6-luna",input:[{role:"user",content:[{type:"input_text",text:prompt},{type:"input_image",image_url:"data:"+mime+";base64,"+data}]}]})});
-  const out=await rr.json(); if(!rr.ok)throw Error(out.error?.message||"KI-Analyse fehlgeschlagen.");
-  let textOut=out.output_text||"";
-  const m=textOut.match(/\{[\s\S]*\}/); if(!m)throw Error("KI-Antwort konnte nicht gelesen werden.");
-  const result=JSON.parse(m[0]);res.json({ok:true,result});
- }catch(e){console.error(e);res.status(500).json({error:e.message||"KI-Analyse fehlgeschlagen."});}
- finally{try{if(req.file?.path)fs.unlinkSync(req.file.path)}catch(e){}}
-});
 app.post("/api/requests",publicRequestLimit,upload.array("photos",8),async(req,res)=>{
  try{
   const {service_type,service,place,date,scope,frequency,description,name,phone,email}=req.body;
