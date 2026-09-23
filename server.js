@@ -25,6 +25,7 @@ async function sendCustomerClaimEmail(request){
   const from=String(process.env.RESEND_FROM||"").trim();
   if(!to||!apiKey||!from)return false;
   const provider=String(request.provider_company||"Dienstleister").trim();
+  const statusUrl=(String(process.env.APP_URL||"https://anfragepro.onrender.com").replace(/\/$/,""))+"/?request="+encodeURIComponent(String(request.request_token||""));
   const subject="AnfragePro: Ein Dienstleister hat deine Anfrage übernommen";
   const html=`<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0e315f">
     <h2>Ein Dienstleister hat deine Anfrage übernommen.</h2>
@@ -34,7 +35,7 @@ async function sendCustomerClaimEmail(request){
       ${String(request.place||"")}
     </div>
     <p><strong>Dienstleister:</strong> ${provider}</p>
-    <p>Öffne deine Anfrage-Seite, um den aktuellen Status zu sehen.</p>
+    <p><a href="${statusUrl}" style="display:inline-block;background:#0e315f;color:#fff;text-decoration:none;padding:13px 18px;border-radius:10px;font-weight:700">Meine Anfrage öffnen →</a></p>
     <p style="color:#667085;font-size:12px">AnfragePro · Lokal. Direkt. Transparent.</p>
   </div>`;
   try{
