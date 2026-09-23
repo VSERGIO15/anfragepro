@@ -74,7 +74,7 @@ app.use(session({
  secret:process.env.SESSION_SECRET||"change-this-secret",
  resave:false,saveUninitialized:false,
  store:useDb?new PgSession({pool,tableName:"user_sessions",createTableIfMissing:true}):undefined,
- cookie:{httpOnly:true,sameSite:"lax",secure:true}
+ cookie:{httpOnly:true,sameSite:"lax",secure:true,maxAge:1000*60*60*24*30}
 }));
 app.use(express.static(path.join(__dirname,"public")));
 const upload=multer({dest:UPLOADS});
