@@ -417,7 +417,7 @@ app.get("/api/request-status/:token",async(req,res)=>{
    }
   }
   res.json({
-   service_type:r.service_type,service:r.service,place:r.place,status:r.status,claimed:!!r.provider_id,
+   service_type:r.service_type,service:r.service,place:r.place,status:r.status,claimed:!!r.provider_id,provider_id:r.provider_id||null,
    review,providerRating,matchingProviders,
    provider:r.provider_id?{
     company:r.provider_company||"Dienstleister",
