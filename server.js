@@ -105,6 +105,12 @@ async function dbInit(){
   message TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL
  );
+ CREATE TABLE IF NOT EXISTS provider_portfolio(
+  id BIGSERIAL PRIMARY KEY,
+  provider_id BIGINT NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+ );
  CREATE TABLE IF NOT EXISTS request_offers(
   id BIGSERIAL PRIMARY KEY,
   request_id BIGINT UNIQUE NOT NULL,
@@ -166,7 +172,7 @@ app.use(session({
  store:useDb?new PgSession({pool,tableName:"user_sessions",createTableIfMissing:true}):undefined,
  cookie:{httpOnly:true,sameSite:"lax",secure:true,maxAge:1000*60*60*24*30}
 }));
-app.use(express.static(path.join(__dirname,"public")));
+app.use(express.static(path.join(__dirname,"public")));\napp.use("/uploads",express.static(UPLOADS));
 const upload=multer({
  dest:UPLOADS,
  limits:{files:8,fileSize:5*1024*1024},
@@ -178,6 +184,50 @@ const upload=multer({
 
 function auth(req,res,next){if(!req.session.userId)return res.status(401).json({error:"Nicht angemeldet"});next();}
 
+app.get("/api/provider-profile/:id",async(req,res)=>{
+ try{
+  const id=Number(req.params.id);let u,photos=[];
+  if(useDb){
+   u=(await pool.query("SELECT id,company,phone,city,services,description FROM users WHERE id=$1",[id])).rows[0];
+   photos=(await pool.query("SELECT image_url FROM provider_portfolio WHERE provider_id=$1 ORDER BY id DESC",[id])).rows.map(x=>x.image_url);
+  }else{
+   const d=read();u=(d.users||[]).find(x=>Number(x.id)===id)||null;
+   photos=(d.provider_portfolio||[]).filter(x=>Number(x.provider_id)===id).map(x=>x.image_url);
+  }
+  if(!u)return res.status(404).json({error:"Dienstleister nicht gefunden."});
+  res.json({company:u.company,phone:u.phone||"",city:u.city||"",services:u.services||"",description:u.description||"",photos});
+ }catch(e){console.error(e);res.status(500).json({error:"Profil konnte nicht geladen werden."});}
+});
+app.post("/api/provider-portfolio",auth,upload.array("photos",6),async(req,res)=>{
+ try{
+  const files=req.files||[];if(!files.length)return res.status(400).json({error:"Bitte mindestens ein Bild auswählen."});
+  if(useDb){
+   const count=(await pool.query("SELECT COUNT(*)::int AS n FROM provider_portfolio WHERE provider_id=$1",[req.session.userId])).rows[0].n;
+   if(count+files.length>6)return res.status(400).json({error:"Maximal 6 Arbeitsbeispiele erlaubt."});
+   for(const f of files)await pool.query("INSERT INTO provider_portfolio(provider_id,image_url,created_at) VALUES($1,$2,NOW())",[req.session.userId,"/uploads/"+f.filename]);
+  }else{
+   const d=read();d.provider_portfolio=d.provider_portfolio||[];const own=d.provider_portfolio.filter(x=>Number(x.provider_id)===Number(req.session.userId));
+   if(own.length+files.length>6)return res.status(400).json({error:"Maximal 6 Arbeitsbeispiele erlaubt."});
+   files.forEach(f=>d.provider_portfolio.push({id:Date.now()+Math.random(),provider_id:req.session.userId,image_url:"/uploads/"+f.filename,created_at:new Date().toISOString()}));write(d);
+  }
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Bilder konnten nicht gespeichert werden."});}
+});
+app.delete("/api/provider-portfolio/:id",auth,async(req,res)=>{
+ try{
+  const id=Number(req.params.id);
+  if(useDb){
+   const row=(await pool.query("SELECT image_url FROM provider_portfolio WHERE id=$1 AND provider_id=$2",[id,req.session.userId])).rows[0];
+   if(!row)return res.status(404).json({error:"Bild nicht gefunden."});
+   await pool.query("DELETE FROM provider_portfolio WHERE id=$1 AND provider_id=$2",[id,req.session.userId]);
+   const file=path.join(__dirname,row.image_url.replace(/^\/uploads\//,""));if(fs.existsSync(file))fs.unlinkSync(file);
+  }else{
+   const d=read();const i=(d.provider_portfolio||[]).findIndex(x=>Number(x.id)===id&&Number(x.provider_id)===Number(req.session.userId));if(i<0)return res.status(404).json({error:"Bild nicht gefunden."});
+   const file=path.join(__dirname,String(d.provider_portfolio[i].image_url).replace(/^\/uploads\//,""));if(fs.existsSync(file))fs.unlinkSync(file);d.provider_portfolio.splice(i,1);write(d);
+  }
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Bild konnte nicht gelöscht werden."});}
+});
 app.post("/api/register",registerLimit,async(req,res)=>{
  try{
   const {email,password,company}=req.body;
