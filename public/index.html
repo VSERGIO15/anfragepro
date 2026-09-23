@@ -581,6 +581,31 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
   .pro-dashboard-preview{padding:17px;border-radius:21px}
   .preview-count{margin:22px 0 13px}
 }
+
+/* Provider dashboard — mobile-first polish */
+#app>.card:first-child{border-radius:20px;padding:12px;margin-bottom:12px}
+#app>.card:first-child .tabs{display:flex;gap:8px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}
+#app>.card:first-child .tabs button{white-space:nowrap;min-height:44px;padding:10px 14px;border-radius:12px}
+#dash>.card:first-of-type{padding:20px!important}
+#dash>.card:first-of-type .grid{gap:10px}
+#dash>.card:first-of-type label{font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+#dash>.card:first-of-type input,#dash>.card:first-of-type textarea{padding:11px 12px;margin:5px 0 9px}
+#dash>.card:first-of-type textarea{min-height:90px}
+@media(max-width:650px){
+  #app>.card:first-child{margin:8px 0 10px;padding:9px;border-radius:16px}
+  #app>.card:first-child .tabs{gap:6px}
+  #app>.card:first-child .tabs button{font-size:12px;min-height:40px;padding:9px 12px}
+  #dash{margin:8px 0!important;padding:16px!important;border-radius:22px!important}
+  #dash>h2{font-size:34px!important;margin-bottom:3px!important}
+  #dash #newCount{display:block!important;width:max-content!important;margin:9px 0 0!important;font-size:12px!important;padding:7px 10px!important}
+  #dash>.card:first-of-type{padding:16px!important;border-radius:20px!important}
+  #dash>.card:first-of-type h3{font-size:20px!important;margin-bottom:14px}
+  #dash>.card:first-of-type .grid{grid-template-columns:1fr!important}
+  #dash>.card:first-of-type .full{grid-column:auto!important}
+  #dash>.card:first-of-type button{width:100%;margin-top:4px}
+  #dash #requests{gap:10px}
+  #dash .req{padding:16px;border-radius:18px}
+}
 </style></head>
 <body>
 <div id="home">
