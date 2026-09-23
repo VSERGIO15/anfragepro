@@ -297,7 +297,7 @@ app.post("/api/register",registerLimit,async(req,res)=>{
    const exists=await pool.query("SELECT id FROM users WHERE email=$1",[emailNorm]);
    if(exists.rowCount)return res.status(400).json({error:"E-Mail bereits registriert."});
    const id=Date.now();
-   await pool.query("INSERT INTO users(id,email,password_hash,company,created_at) VALUES($1,$2,$3,$4,NOW())",[id,emailNorm,await bcrypt.hash(password,12),company]);
+   await pool.query("INSERT INTO users(id,email,password_hash,company,created_at) VALUES($1,$2,$3,$4,NOW())",[id,emailNorm,await bcrypt.hash(password,12),company]);\n   const verifyToken=crypto.randomBytes(32).toString("hex"); await pool.query("UPDATE users SET email_verification_token=$1,email_verification_expires=NOW()+INTERVAL '24 hours' WHERE id=$2",[verifyToken,id]); await sendVerificationEmail({email:emailNorm},verifyToken);
    req.session.userId=id;
    await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
   }else{
