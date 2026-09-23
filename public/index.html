@@ -679,6 +679,12 @@ body{background:var(--p-cream);color:var(--p-ink);font-family:Inter,Arial,sans-s
 .pro-hero h1 i .led-word{background:linear-gradient(110deg,#d9a441 0%,#d9a441 42%,#ffd9ea 47%,#fff 50%,#ffd9ea 53%,#d9a441 58%,#d9a441 100%);background-size:260% 100%;background-position:100% 0;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 @keyframes heroLedSweep{0%,18%{background-position:100% 0}55%,100%{background-position:-160% 0}}
 @media(prefers-reduced-motion:reduce){.pro-hero h1 .led-word{animation:none;background-position:50% 0}}
+/* Moving cyan light around the hero photo */
+.pro-hero-art{position:relative;isolation:isolate}
+.pro-hero-art:before{content:"";position:absolute;z-index:5;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,transparent 0deg,transparent 315deg,#c9fbff 335deg,#22d3ee 350deg,#e8feff 358deg,#c9fbff 360deg);animation:photoLedRing 3.6s linear infinite;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;pointer-events:none}
+.pro-hero-art:after{content:"";position:absolute;z-index:4;inset:-1px;border-radius:inherit;box-shadow:0 0 18px #22d3ee2e;pointer-events:none}
+@keyframes photoLedRing{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.pro-hero-art:before{animation:none}}
 </style></head>
 <body>
 <div id="home">
