@@ -953,9 +953,9 @@ const legalPages={impressum:{kicker:"ANFRAGEPRO · IMPRESSUM",title:"Impressum",
 </script>
 <script>
 const $=id=>document.getElementById(id);
-function showHome(){$("home").classList.remove("hide");$("app").classList.add("hide");["login","register","request","dash","requestStatusPage"].forEach(x=>$(x).classList.add("hide"));window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
-function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash();if(id==="customerDash")loadCustomerRequests()}
-function openCustomerRequest(){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage"].forEach(x=>$(x).classList.add("hide"));$("request").classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
+function showHome(){$("home").classList.remove("hide");$("app").classList.add("hide");["login","register","request","dash","requestStatusPage","customerLogin","customerRegister","customerDash"].forEach(x=>$(x).classList.add("hide"));window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
+function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage","customerLogin","customerRegister","customerDash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash();if(id==="customerDash")loadCustomerRequests()}
+function openCustomerRequest(){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage","customerLogin","customerRegister","customerDash"].forEach(x=>$(x).classList.add("hide"));$("request").classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
 async function openCustomerStatus(token){if(!token)return;clearInterval(customerStatusTimer);customerStatusToken=token;$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$("requestStatusPage").classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"});await checkCustomerStatusPage();customerStatusTimer=setInterval(checkCustomerStatusPage,5000)}
 function esc(v){return String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 let selectedRating=0;const chatTimers={};
@@ -1014,9 +1014,8 @@ async function logout(){await api("/api/logout",{method:"POST"});showHome()}
 async function loadPortfolio(){try{const d=await api("/api/me");const p=await api("/api/provider-profile/"+d.id);$("portfolioGrid").innerHTML=(p.photos||[]).map(x=>'<div class="portfolio-item"><img src="'+x.image_url+'"><button onclick="removePortfolio('+x.id+')">×</button></div>').join("")}catch(e){}}
 async function uploadPortfolio(){const files=$("portfolioFiles").files;if(!files.length)return;const fd=new FormData();Array.from(files).forEach(f=>fd.append("photos",f));try{await api("/api/provider-portfolio",{method:"POST",body:fd});$("portfolioFiles").value="";$("portfolioMsg").textContent="Bilder gespeichert.";await loadPortfolio()}catch(e){$("portfolioMsg").textContent=e.message}}
 async function removePortfolio(id){try{await api("/api/provider-portfolio/"+id,{method:"DELETE"});await loadPortfolio()}catch(e){alert(e.message)}}
-<script>
-
 </script>
+<script>
 window.addEventListener("load",async()=>{
   const token=new URLSearchParams(location.search).get("request");
   if(token){openCustomerStatus(token);return}
