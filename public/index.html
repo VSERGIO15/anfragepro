@@ -974,6 +974,8 @@ async function loadPortfolio(){try{const d=await api("/api/me");const p=await ap
 async function uploadPortfolio(){const files=$("portfolioFiles").files;if(!files.length)return;const fd=new FormData();Array.from(files).forEach(f=>fd.append("photos",f));try{await api("/api/provider-portfolio",{method:"POST",body:fd});$("portfolioFiles").value="";$("portfolioMsg").textContent="Bilder gespeichert.";await loadPortfolio()}catch(e){$("portfolioMsg").textContent=e.message}}
 async function removePortfolio(id){try{await api("/api/provider-portfolio/"+id,{method:"DELETE"});await loadPortfolio()}catch(e){alert(e.message)}}
 <script>
+
+</script>
 window.addEventListener("load",async()=>{
   const token=new URLSearchParams(location.search).get("request");
   if(token){openCustomerStatus(token);return}
