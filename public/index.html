@@ -956,7 +956,7 @@ const $=id=>document.getElementById(id);
 function showHome(){$("home").classList.remove("hide");$("app").classList.add("hide");["login","register","request","dash","requestStatusPage","customerLogin","customerRegister","customerDash"].forEach(x=>$(x).classList.add("hide"));window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
 function view(id){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage","customerLogin","customerRegister","customerDash"].forEach(x=>$(x).classList.add("hide"));$(id).classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"});if(id==="dash")loadDash();if(id==="customerDash")loadCustomerRequests()}
 function openCustomerRequest(){$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash","requestStatusPage","customerLogin","customerRegister","customerDash"].forEach(x=>$(x).classList.add("hide"));$("request").classList.remove("hide");window.history.replaceState({},document.title,"/");window.scrollTo({top:0,behavior:"smooth"})}
-async function openCustomerStatus(token){if(!token)return;clearInterval(customerStatusTimer);customerStatusToken=token;$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$("requestStatusPage").classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"});await checkCustomerStatusPage();customerStatusTimer=setInterval(checkCustomerStatusPage,5000)}
+async function openCustomerStatus(token){if(!token)return;clearInterval(customerStatusTimer);customerStatusToken=token;$("home").classList.add("hide");$("app").classList.remove("hide");["login","register","request","dash"].forEach(x=>$(x).classList.add("hide"));$("requestStatusPage").classList.remove("hide");window.history.replaceState({},document.title,"/?request="+encodeURIComponent(token));window.scrollTo({top:0,behavior:"smooth"});await checkCustomerStatusPage();customerStatusTimer=setInterval(checkCustomerStatusPage,5000)}
 function esc(v){return String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 let selectedRating=0;const chatTimers={};
 function renderRating(r){const box=$("statusRating");if(r.review){box.classList.remove("hide");box.innerHTML="<div class=\"rating-success\">✓ Deine Bewertung wurde gespeichert. Danke für dein Feedback!</div>";return}if(r.status!=="completed"){box.classList.add("hide");box.innerHTML="";return}box.classList.remove("hide");selectedRating=0;box.innerHTML="<h3>Wie war deine Erfahrung?</h3><div class=\"rating-stars\">"+[1,2,3,4,5].map(n=>"<button type=\"button\" class=\"rating-star\" onclick=\"selectRating("+n+")\">★</button>").join("")+"</div><div id=\"ratingCurrent\" class=\"rating-current\">Bitte Sterne wählen</div><textarea id=\"ratingComment\" maxlength=\"1000\" placeholder=\"Optional: Was hat dir gefallen?\"></textarea><p class=\"rating-note\">Deine Bewertung wird dem Profil des Dienstleisters zugeordnet.</p><button style=\"margin-top:10px;width:100%\" onclick=\"submitRating()\">Bewertung abgeben →</button>"}
@@ -1022,6 +1022,11 @@ window.addEventListener("load",async()=>{
   try{
     await api("/api/me");
     view("dash");
+    return;
+  }catch(e){}
+  try{
+    await api("/api/customer/me");
+    view("customerDash");
   }catch(e){}
 });
 
