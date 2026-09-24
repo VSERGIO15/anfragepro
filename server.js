@@ -144,9 +144,17 @@ async function dbInit(){
   status TEXT DEFAULT 'pending',
   created_at TIMESTAMPTZ NOT NULL
  );
+ CREATE TABLE IF NOT EXISTS customer_accounts(
+  id BIGSERIAL PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+ );
  CREATE TABLE IF NOT EXISTS requests(
   id BIGINT PRIMARY KEY,
   user_id BIGINT,
+  customer_id BIGINT,
   service_type TEXT,
   service TEXT,
   place TEXT,
@@ -163,6 +171,7 @@ async function dbInit(){
   created_at TIMESTAMPTZ NOT NULL
  );
  `);
+ await pool.query("ALTER TABLE requests ADD COLUMN IF NOT EXISTS customer_id BIGINT");
  await pool.query("ALTER TABLE provider_portfolio ADD COLUMN IF NOT EXISTS image_data BYTEA");
  await pool.query("ALTER TABLE provider_portfolio ADD COLUMN IF NOT EXISTS mime_type TEXT DEFAULT 'image/jpeg'");
  await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE");
@@ -379,6 +388,65 @@ app.patch("/api/profile",auth,async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Profil konnte nicht gespeichert werden."});}
 });
 
+app.post("/api/customer/register",registerLimit,async(req,res)=>{
+ try{
+  const name=String(req.body.name||"").trim(),email=String(req.body.email||"").trim().toLowerCase(),password=String(req.body.password||"");
+  if(!name||!email||password.length<8)return res.status(400).json({error:"Bitte Name, E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben."});
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({error:"Bitte eine gültige E-Mail-Adresse eingeben."});
+  let id;
+  if(useDb){
+   const exists=(await pool.query("SELECT id FROM customer_accounts WHERE email=$1",[email])).rows[0];
+   if(exists)return res.status(409).json({error:"Für diese E-Mail gibt es bereits ein Kundenkonto."});
+   id=(await pool.query("INSERT INTO customer_accounts(email,name,password_hash,created_at) VALUES($1,$2,$3,NOW()) RETURNING id",[email,name,await bcrypt.hash(password,12)])).rows[0].id;
+   await pool.query("UPDATE requests SET customer_id=$1 WHERE customer_id IS NULL AND LOWER(email)=LOWER($2)",[id,email]);
+  }else{
+   const d=read();d.customers=d.customers||[];
+   if(d.customers.some(x=>String(x.email).toLowerCase()===email))return res.status(409).json({error:"Für diese E-Mail gibt es bereits ein Kundenkonto."});
+   id=Date.now();d.customers.push({id,email,name,password_hash:await bcrypt.hash(password,12),created_at:new Date().toISOString()});
+   d.requests.forEach(r=>{if(!r.customer_id&&String(r.email||"").toLowerCase()===email)r.customer_id=id});write(d);
+  }
+  req.session.customerId=id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
+  res.json({ok:true});
+ }catch(e){console.error(e);res.status(500).json({error:"Kundenkonto konnte nicht erstellt werden."});}
+});
+app.post("/api/customer/login",loginLimit,async(req,res)=>{
+ try{
+  const email=String(req.body.email||"").trim().toLowerCase(),password=String(req.body.password||"");
+  let u;
+  if(useDb)u=(await pool.query("SELECT * FROM customer_accounts WHERE email=$1",[email])).rows[0];
+  else u=(read().customers||[]).find(x=>String(x.email).toLowerCase()===email);
+  if(!u||!(await bcrypt.compare(password,u.password_hash)))return res.status(401).json({error:"E-Mail oder Passwort ist falsch."});
+  req.session.customerId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
+  res.json({ok:true,name:u.name});
+ }catch(e){console.error(e);res.status(500).json({error:"Login fehlgeschlagen."});}
+});
+app.post("/api/customer/logout",(req,res)=>{
+ delete req.session.customerId;
+ req.session.save(()=>res.json({ok:true}));
+});
+app.get("/api/customer/me",async(req,res)=>{
+ try{
+  if(!req.session.customerId)return res.status(401).json({error:"Nicht eingeloggt."});
+  let u;
+  if(useDb)u=(await pool.query("SELECT id,email,name FROM customer_accounts WHERE id=$1",[req.session.customerId])).rows[0];
+  else u=(read().customers||[]).find(x=>Number(x.id)===Number(req.session.customerId));
+  if(!u)return res.status(401).json({error:"Kundenkonto nicht gefunden."});
+  res.json({id:u.id,email:u.email,name:u.name});
+ }catch(e){res.status(500).json({error:"Kundenkonto konnte nicht geladen werden."});}
+});
+app.get("/api/customer/requests",async(req,res)=>{
+ try{
+  if(!req.session.customerId)return res.status(401).json({error:"Nicht eingeloggt."});
+  let rows;
+  if(useDb){
+   rows=(await pool.query("SELECT id,service_type,service,place,date,status,request_token,provider_id,created_at FROM requests WHERE customer_id=$1 ORDER BY id DESC",[req.session.customerId])).rows;
+  }else{
+   rows=(read().requests||[]).filter(r=>Number(r.customer_id)===Number(req.session.customerId)).sort((a,b)=>b.id-a.id).map(r=>({id:r.id,service_type:r.service_type,service:r.service,place:r.place,date:r.date,status:r.status,request_token:r.request_token,provider_id:r.provider_id,created_at:r.created_at}));
+  }
+  res.json(rows);
+ }catch(e){console.error(e);res.status(500).json({error:"Anfragen konnten nicht geladen werden."});}
+});
+
 app.get("/api/admin/stats",auth,async(req,res)=>{
  try{if(!(await isAdmin(req)))return res.status(403).json({error:"Kein Admin-Zugriff."});
   let s;
@@ -440,12 +508,12 @@ app.post("/api/requests",publicRequestLimit,upload.array("photos",8),async(req,r
   if(!service_type||!service||!name||!phone||!emailNorm)return res.status(400).json({error:"Bitte alle Pflichtfelder ausfüllen."});
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm))return res.status(400).json({error:"Bitte eine gültige E-Mail-Adresse eingeben."});
   if(String(service).length>200||String(name).length>120||String(phone).length>50||String(description||"").length>3000)return res.status(400).json({error:"Ein Feld ist zu lang."});
-  const id=Date.now(),photoCount=(req.files||[]).length,requestToken=crypto.randomBytes(18).toString("hex");
+  const id=Date.now(),photoCount=(req.files||[]).length,requestToken=crypto.randomBytes(18).toString("hex"),customerId=req.session.customerId||null;
   if(useDb) await pool.query(
-   "INSERT INTO requests(id,user_id,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count,status,provider_id,created_at,request_token) VALUES($1,NULL,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'new',NULL,NOW(),$13)",
-   [id,service_type,service,place,date,scope,frequency,description,name,phone,emailNorm,photoCount,requestToken]
+   "INSERT INTO requests(id,user_id,customer_id,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count,status,provider_id,created_at,request_token) VALUES($1,NULL,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'new',NULL,NOW(),$14)",
+   [id,customerId,service_type,service,place,date,scope,frequency,description,name,phone,emailNorm,photoCount,requestToken]
   );
-  else{const d=read();d.requests.push({id,user_id:null,service_type,service,place,date,scope,frequency,description,name,phone,email:emailNorm,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString(),request_token:requestToken});write(d);}
+  else{const d=read();d.customers=d.customers||[];d.requests.push({id,user_id:null,customer_id:customerId,service_type,service,place,date,scope,frequency,description,name,phone,email:emailNorm,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString(),request_token:requestToken});write(d);}
   res.json({ok:true,id,request_token:requestToken});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht gespeichert werden."});}
 });
