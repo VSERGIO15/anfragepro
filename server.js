@@ -8,7 +8,9 @@ const path=require("path");
 const {Pool}=require("pg");
 const PgSession=require("connect-pg-simple")(session);
 
-const app=express(), PORT=process.env.PORT||3000;\nif(process.env.NODE_ENV==="production"&&!String(process.env.SESSION_SECRET||"").trim())throw new Error("SESSION_SECRET muss in Production gesetzt sein.");\nconst SESSION_SECRET=String(process.env.SESSION_SECRET||"change-this-secret");
+const app=express(), PORT=process.env.PORT||3000;
+if(process.env.NODE_ENV==="production"&&!String(process.env.SESSION_SECRET||"").trim())throw new Error("SESSION_SECRET muss in Production gesetzt sein.");
+const SESSION_SECRET=String(process.env.SESSION_SECRET||"change-this-secret");
 app.set("trust proxy",1);
 const DATA=path.join(__dirname,"data.json");
 const UPLOADS=path.join(__dirname,"uploads");
@@ -529,7 +531,8 @@ app.post("/api/requests",publicRequestLimit,upload.array("photos",8),async(req,r
    [id,customerId,service_type,service,place,date,scope,frequency,description,name,phone,emailNorm,photoCount,requestToken]
   );
   else{const d=read();d.customers=d.customers||[];d.requests.push({id,user_id:null,customer_id:customerId,service_type,service,place,date,scope,frequency,description,name,phone,email:emailNorm,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString(),request_token:requestToken});write(d);}
-  notifyMatchingProviders({request_token:requestToken,service_type,service,place});\n  res.json({ok:true,id,request_token:requestToken});
+  notifyMatchingProviders({request_token:requestToken,service_type,service,place});
+  res.json({ok:true,id,request_token:requestToken});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht gespeichert werden."});}
 });
 
@@ -609,7 +612,9 @@ app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
   if(useDb){
    request=(await pool.query("SELECT * FROM requests WHERE id=$1",[id])).rows[0];
    if(!request)return res.status(404).json({error:"Nicht gefunden"});
-   if(request.provider_id&&Number(request.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});\n   const providerVerified=(await pool.query("SELECT email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];\n   if(providerVerified&&!providerVerified.email_verified)return res.status(403).json({error:"Bitte zuerst deine E-Mail-Adresse bestätigen."});
+   if(request.provider_id&&Number(request.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});
+   const providerVerified=(await pool.query("SELECT email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];
+   if(providerVerified&&!providerVerified.email_verified)return res.status(403).json({error:"Bitte zuerst deine E-Mail-Adresse bestätigen."});
    const provider=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];
    providerCompany=provider?.company||"Dienstleister";
    await pool.query("UPDATE requests SET provider_id=$1 WHERE id=$2",[req.session.userId,id]);
