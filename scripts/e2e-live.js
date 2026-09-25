@@ -42,7 +42,7 @@ let failures=0;
 async function loginProvider(label,email,password){
   const c=new Client(label);
   const login=await c.request("/api/login",{method:"POST",body:{email,password}});
-  ok(login.status===200, label+" login");
+  ok(login.status===200, label+" login"+(login.status===200?"":" ["+login.status+" "+String(login.data?.error||login.data?.message||"ohne Fehlermeldung")+"]"));
   const me=await c.request("/api/me");
   ok(me.status===200, label+" /api/me");
   ok(me.data?.email_verified===true, label+" ist per E-Mail verifiziert");
