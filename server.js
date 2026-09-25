@@ -8,7 +8,7 @@ const path=require("path");
 const {Pool}=require("pg");
 const PgSession=require("connect-pg-simple")(session);
 
-const app=express(), PORT=process.env.PORT||3000;
+const app=express(), PORT=process.env.PORT||3000;\nif(process.env.NODE_ENV==="production"&&!String(process.env.SESSION_SECRET||"").trim())throw new Error("SESSION_SECRET muss in Production gesetzt sein.");\nconst SESSION_SECRET=String(process.env.SESSION_SECRET||"change-this-secret");
 app.set("trust proxy",1);
 const DATA=path.join(__dirname,"data.json");
 const UPLOADS=path.join(__dirname,"uploads");
@@ -61,6 +61,20 @@ async function sendOfferAcceptedEmail(request,providerEmail){
  return sendEmail({to:providerEmail,subject:"AnfragePro: Angebot angenommen",html});
 }
 
+async function notifyMatchingProviders(request){
+ try{
+  const norm=x=>String(x||"").trim().toLowerCase();
+  const place=norm(request.place),st=norm(request.service_type),sv=norm(request.service);
+  let providers;
+  if(useDb) providers=(await pool.query("SELECT email,company,city,services FROM users WHERE email_verified=TRUE AND email IS NOT NULL AND email<>''")).rows;
+  else providers=(read().users||[]).filter(u=>u.email_verified===true&&u.email).map(u=>({email:u.email,company:u.company,city:u.city,services:u.services}));
+  const matches=providers.filter(u=>{
+   const city=norm(u.city),services=norm(u.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+   return !!(city&&place&&(place.includes(city)||city.includes(place)))&&services.some(s=>s&&(st.includes(s)||sv.includes(s)||s.includes(st)||s.includes(sv)));
+  });
+  await Promise.all(matches.slice(0,25).map(u=>sendEmail({to:u.email,subject:"AnfragePro: Neue passende Anfrage",html:"<div style=\"font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0e315f\"><h2>Neue passende Anfrage bei AnfragePro</h2><p>Eine neue Anfrage passt zu deinem Profil.</p><p><strong>"+String(request.service||request.service_type||"Anfrage")+"</strong><br>"+String(request.place||"")+"</p><p><a href=\""+statusUrl(request.request_token)+"\">Anfrage ansehen →</a></p><p style=\"color:#667085;font-size:12px\">Deine verifizierten Profilangaben passen zu Ort und Leistung.</p></div>"})));
+ }catch(e){console.error("Matching-Benachrichtigung:",e)}
+}
 async function sendVerificationEmail(user,token){
  const link=statusUrl("").replace("/?request=","/verify-email?token=")+encodeURIComponent(token);
  return sendEmail({to:user.email,subject:"AnfragePro: E-Mail-Adresse bestätigen",html:"<div style=\"font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0e315f\"><h2>E-Mail-Adresse bestätigen</h2><p>Bitte bestätige deine E-Mail-Adresse für dein AnfragePro-Dienstleisterkonto.</p><p><a href=\""+link+"\" style=\"display:inline-block;background:#0e315f;color:#fff;text-decoration:none;padding:13px 18px;border-radius:10px;font-weight:700\">E-Mail bestätigen →</a></p><p style=\"color:#667085;font-size:12px\">Der Link ist 24 Stunden gültig.</p></div>"});
@@ -203,7 +217,7 @@ app.use((req,res,next)=>{
 app.use(express.json({limit:"100kb"}));
 app.use(express.urlencoded({extended:true,limit:"50kb"}));
 app.use(session({
- secret:process.env.SESSION_SECRET||"change-this-secret",
+ secret:SESSION_SECRET,
  resave:false,saveUninitialized:false,
  store:useDb?new PgSession({pool,tableName:"user_sessions",createTableIfMissing:true}):undefined,
  cookie:{httpOnly:true,sameSite:"lax",secure:true,maxAge:1000*60*60*24*30}
@@ -337,7 +351,7 @@ app.post("/api/login",loginLimit,async(req,res)=>{
   const password=String(req.body.password||"");
   if(!u)return res.status(401).json({error:"E-Mail nicht gefunden."});
   if(!u.password_hash||!(await bcrypt.compare(password,u.password_hash)))return res.status(401).json({error:"Passwort falsch."});
-  req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));const tokenData=String(u.id)+"."+Date.now();const token=Buffer.from(tokenData+"."+crypto.createHmac("sha256",process.env.SESSION_SECRET||"change-this-secret").update(tokenData).digest("hex")).toString("base64url");res.json({ok:true,company:u.company,remember_token:token});
+  req.session.userId=u.id;await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));const tokenData=String(u.id)+"."+Date.now();const token=Buffer.from(tokenData+"."+crypto.createHmac("sha256",SESSION_SECRET).update(tokenData).digest("hex")).toString("base64url");res.json({ok:true,company:u.company,remember_token:token});
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler beim Login."});}
 });
 
@@ -350,7 +364,7 @@ app.get("/api/restore-session",async(req,res)=>{
   const userId=parts[0],issued=Number(parts[1]),sig=parts[2];
   if(!userId||!issued||Date.now()-issued>1000*60*60*24*30)return res.status(401).json({error:"Gespeicherte Anmeldung abgelaufen."});
   const tokenData=userId+"."+issued;
-  const expected=crypto.createHmac("sha256",process.env.SESSION_SECRET||"change-this-secret").update(tokenData).digest("hex");
+  const expected=crypto.createHmac("sha256",SESSION_SECRET).update(tokenData).digest("hex");
   if(!crypto.timingSafeEqual(Buffer.from(sig),Buffer.from(expected)))return res.status(401).json({error:"Ungültige Anmeldung."});
   let u;
   if(useDb)u=(await pool.query("SELECT id,email,company FROM users WHERE id=$1",[userId])).rows[0];
@@ -515,7 +529,7 @@ app.post("/api/requests",publicRequestLimit,upload.array("photos",8),async(req,r
    [id,customerId,service_type,service,place,date,scope,frequency,description,name,phone,emailNorm,photoCount,requestToken]
   );
   else{const d=read();d.customers=d.customers||[];d.requests.push({id,user_id:null,customer_id:customerId,service_type,service,place,date,scope,frequency,description,name,phone,email:emailNorm,photo_count:photoCount,status:"new",provider_id:null,created_at:new Date().toISOString(),request_token:requestToken});write(d);}
-  res.json({ok:true,id,request_token:requestToken});
+  notifyMatchingProviders({request_token:requestToken,service_type,service,place});\n  res.json({ok:true,id,request_token:requestToken});
  }catch(e){console.error(e);res.status(500).json({error:"Anfrage konnte nicht gespeichert werden."});}
 });
 
@@ -595,7 +609,7 @@ app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
   if(useDb){
    request=(await pool.query("SELECT * FROM requests WHERE id=$1",[id])).rows[0];
    if(!request)return res.status(404).json({error:"Nicht gefunden"});
-   if(request.provider_id&&Number(request.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});
+   if(request.provider_id&&Number(request.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});\n   const providerVerified=(await pool.query("SELECT email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];\n   if(providerVerified&&!providerVerified.email_verified)return res.status(403).json({error:"Bitte zuerst deine E-Mail-Adresse bestätigen."});
    const provider=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];
    providerCompany=provider?.company||"Dienstleister";
    await pool.query("UPDATE requests SET provider_id=$1 WHERE id=$2",[req.session.userId,id]);
