@@ -1,0 +1,33 @@
+name: Provision E2E Providers
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Deployed AnfragePro URL"
+        required: true
+        default: "https://anfragepro.onrender.com"
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Provision provider 1
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          PROVISION_SECRET: ${{ secrets.E2E_PROVISION_SECRET }}
+          PASSWORD: ${{ secrets.E2E_PROVIDER1_PASSWORD }}
+        run: |
+          curl --fail-with-body -sS -X POST "${BASE_URL}/api/e2e/provision-provider"             -H "Content-Type: application/json"             -H "X-E2E-Provision-Secret: ${PROVISION_SECRET}"             --data-binary @- <<JSON
+          {"email":"e2e-provider1@example.test","password":"${PASSWORD}","company":"E2E Test Provider 1","phone":"+491234567890","city":"Gifhorn","services":"Reinigung"}
+          JSON
+
+      - name: Provision provider 2
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          PROVISION_SECRET: ${{ secrets.E2E_PROVISION_SECRET }}
+          PASSWORD: ${{ secrets.E2E_PROVIDER2_PASSWORD }}
+        run: |
+          curl --fail-with-body -sS -X POST "${BASE_URL}/api/e2e/provision-provider"             -H "Content-Type: application/json"             -H "X-E2E-Provision-Secret: ${PROVISION_SECRET}"             --data-binary @- <<JSON
+          {"email":"e2e-provider2@example.test","password":"${PASSWORD}","company":"E2E Test Provider 2","phone":"+491234567891","city":"Gifhorn","services":"Reinigung"}
+          JSON
