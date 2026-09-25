@@ -661,6 +661,8 @@ app.post("/api/requests/:id/offer",auth,async(req,res)=>{
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
    if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Für diese Anfrage kann kein Angebot mehr gesendet werden."});
+   const existingOffer=(await pool.query("SELECT status FROM request_offers WHERE request_id=$1",[id])).rows[0];
+   if(existingOffer&&String(existingOffer.status)==="accepted")return res.status(409).json({error:"Das Angebot wurde bereits angenommen und kann nicht ersetzt werden."});
    await pool.query("INSERT INTO request_offers(request_id,provider_id,price_min,price_max,availability,message,status,created_at) VALUES($1,$2,$3,$4,$5,$6,'pending',NOW()) ON CONFLICT(request_id) DO UPDATE SET price_min=EXCLUDED.price_min,price_max=EXCLUDED.price_max,availability=EXCLUDED.availability,message=EXCLUDED.message,status='pending',created_at=NOW()",[id,req.session.userId,priceMin,priceMax,availability,message]);
    const provider=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];
    await sendOfferEmail(r,{price_min:priceMin,price_max:priceMax},provider?.company);
@@ -701,8 +703,8 @@ app.post("/api/request-status/:token/offer/accept",async(req,res)=>{
    if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr angenommen werden."});
    const o=(await pool.query("SELECT id,status FROM request_offers WHERE request_id=$1",[r.id])).rows[0];
    if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
-   if(String(o.status)!=="pending")return res.status(409).json({error:"Dieses Angebot wurde bereits bearbeitet."});
-   await pool.query("UPDATE request_offers SET status='accepted' WHERE request_id=$1 AND status='pending'",[r.id]);
+   const accepted=(await pool.query("UPDATE request_offers SET status='accepted' WHERE request_id=$1 AND status='pending' RETURNING id",[r.id])).rows[0];
+   if(!accepted)return res.status(409).json({error:"Dieses Angebot wurde bereits bearbeitet."});
    await pool.query("UPDATE requests SET status='accepted' WHERE id=$1",[r.id]);
    const provider=(await pool.query("SELECT email FROM users WHERE id=$1",[r.provider_id])).rows[0];
    await sendOfferAcceptedEmail(r,provider?.email);
@@ -801,7 +803,7 @@ app.patch("/api/requests/:id",auth,async(req,res)=>{
   const id=Number(req.params.id),allowed=["new","contacted","accepted","completed"];
   if(!allowed.includes(req.body.status))return res.status(400).json({error:"Ungültiger Status."});
   if(useDb){
-   const r=(await pool.query("SELECT provider_id FROM requests WHERE id=$1",[id])).rows[0];
+   const r=(await pool.query("SELECT provider_id,status FROM requests WHERE id=$1",[id])).rows[0];
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
    if(["cancelled","completed"].includes(String(r.status))&&String(req.body.status)!==String(r.status))return res.status(400).json({error:"Dieser Auftrag ist bereits abgeschlossen oder storniert."});
