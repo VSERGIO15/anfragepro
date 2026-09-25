@@ -819,6 +819,30 @@ app.patch("/api/requests/:id",auth,async(req,res)=>{
  }catch(e){console.error(e);res.status(500).json({error:"Status konnte nicht geändert werden."});}
 });
 
+app.post("/api/e2e/provision-provider",async(req,res)=>{
+ const configured=String(process.env.E2E_PROVISION_SECRET||"").trim();
+ const supplied=String(req.get("X-E2E-Provision-Secret")||"").trim();
+ if(!configured||!supplied)return res.status(404).json({error:"Nicht gefunden"});
+ const a=Buffer.from(configured),b=Buffer.from(supplied);
+ if(a.length!==b.length||!crypto.timingSafeEqual(a,b))return res.status(404).json({error:"Nicht gefunden"});
+ try{
+  const email=String(req.body?.email||"").trim().toLowerCase(),password=String(req.body?.password||"");
+  const company=String(req.body?.company||"").trim(),phone=String(req.body?.phone||"").trim();
+  const city=String(req.body?.city||"").trim(),services=String(req.body?.services||"").trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||password.length<8||!company||!city||!services)return res.status(400).json({error:"Ungültige Testdaten"});
+  const password_hash=await bcrypt.hash(password,12),now=new Date().toISOString();
+  if(useDb){
+   const existing=(await pool.query("SELECT id FROM users WHERE email=$1",[email])).rows[0];
+   if(existing)await pool.query("UPDATE users SET password_hash=$1,company=$2,phone=$3,city=$4,services=$5,email_verified=TRUE,email_verification_token=NULL,email_verification_expires=NULL WHERE id=$6",[password_hash,company,phone,city,services,existing.id]);
+   else await pool.query("INSERT INTO users(id,email,password_hash,company,phone,city,services,created_at,email_verified) VALUES($1,$2,$3,$4,$5,$6,$7,$8,TRUE)",[Date.now()+Math.floor(Math.random()*100000),email,password_hash,company,phone,city,services,now]);
+  }else{
+   const d=read(),users=d.users||[],idx=users.findIndex(u=>String(u.email||"").toLowerCase()===email);
+   const user={...(idx>=0?users[idx]:{}),id:idx>=0?users[idx].id:Date.now()+Math.floor(Math.random()*100000),email,password_hash,company,phone,city,services,created_at:idx>=0?users[idx].created_at:now,email_verified:true,email_verification_token:null,email_verification_expires:null};
+   if(idx>=0)users[idx]=user;else users.push(user);d.users=users;write(d);
+  }
+  res.json({ok:true,email,verified:true});
+ }catch(e){console.error("E2E-Provisionierung:",e);res.status(500).json({error:"Provisionierung fehlgeschlagen"});}
+});
 app.get("/health",(req,res)=>res.json({ok:true,service:"AnfragePro",database:useDb?"postgres":"json"}));
 
 app.use((err,req,res,next)=>{
