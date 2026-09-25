@@ -486,7 +486,7 @@ app.get("/api/requests",auth,async(req,res)=>{
   let me;
   let requests;
   if(useDb){
-   me=(await pool.query("SELECT city,services FROM users WHERE id=$1",[req.session.userId])).rows[0];
+   me=(await pool.query("SELECT city,services,email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];
    requests=(await pool.query("SELECT * FROM requests ORDER BY id DESC")).rows;
   }else{
    const d=read();
