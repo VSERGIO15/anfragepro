@@ -439,9 +439,10 @@ app.get("/api/customer/requests",async(req,res)=>{
   if(!req.session.customerId)return res.status(401).json({error:"Nicht eingeloggt."});
   let rows;
   if(useDb){
-   rows=(await pool.query("SELECT id,service_type,service,place,date,status,request_token,provider_id,created_at FROM requests WHERE customer_id=$1 ORDER BY id DESC",[req.session.customerId])).rows;
+   rows=(await pool.query("SELECT r.id,r.service_type,r.service,r.place,r.date,r.status,r.request_token,r.provider_id,r.created_at,o.status AS offer_status FROM requests r LEFT JOIN request_offers o ON o.request_id=r.id WHERE r.customer_id=$1 ORDER BY r.id DESC",[req.session.customerId])).rows;
   }else{
-   rows=(read().requests||[]).filter(r=>Number(r.customer_id)===Number(req.session.customerId)).sort((a,b)=>b.id-a.id).map(r=>({id:r.id,service_type:r.service_type,service:r.service,place:r.place,date:r.date,status:r.status,request_token:r.request_token,provider_id:r.provider_id,created_at:r.created_at}));
+   const d=read();
+   rows=(d.requests||[]).filter(r=>Number(r.customer_id)===Number(req.session.customerId)).sort((a,b)=>b.id-a.id).map(r=>({id:r.id,service_type:r.service_type,service:r.service,place:r.place,date:r.date,status:r.status,request_token:r.request_token,provider_id:r.provider_id,created_at:r.created_at,offer_status:(d.offers||[]).find(o=>Number(o.request_id)===Number(r.id))?.status||null}));
   }
   res.json(rows);
  }catch(e){console.error(e);res.status(500).json({error:"Anfragen konnten nicht geladen werden."});}
