@@ -382,10 +382,10 @@ app.post("/api/logout",(req,res)=>req.session.destroy(()=>res.json({ok:true})));
 app.get("/api/me",auth,async(req,res)=>{
  try{
   let u;
-  if(useDb) u=(await pool.query("SELECT id,email,company,phone,city,services,description FROM users WHERE id=$1",[req.session.userId])).rows[0];
+  if(useDb) u=(await pool.query("SELECT id,email,company,phone,city,services,description,email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];
   else u=read().users.find(x=>x.id===req.session.userId);
   if(!u){req.session.destroy(()=>{});return res.status(401).json({error:"Sitzung abgelaufen. Bitte neu einloggen."});}
-  res.json({id:u.id,email:u.email,company:u.company,phone:u.phone||"",city:u.city||"",services:u.services||"",description:u.description||""});
+  res.json({id:u.id,email:u.email,company:u.company,phone:u.phone||"",city:u.city||"",services:u.services||"",description:u.description||"",email_verified:u.email_verified!==false});
  }catch(e){console.error(e);res.status(500).json({error:"Serverfehler."});}
 });
 
@@ -493,7 +493,7 @@ app.get("/api/requests",auth,async(req,res)=>{
    me=d.users.find(x=>x.id===req.session.userId)||{};
    requests=d.requests.sort((a,b)=>b.id-a.id);
   }
-  requests=requests.filter(r=>!r.provider_id||Number(r.provider_id)===Number(req.session.userId));
+  requests=requests.filter(r=>(!r.provider_id&&me?.email_verified!==false)||Number(r.provider_id)===Number(req.session.userId));
   const normalize=x=>String(x||"").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
   const city=normalize(me?.city);
   const services=normalize(me?.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
