@@ -1,0 +1,31 @@
+name: Live E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Deployed AnfragePro URL"
+        required: true
+        default: "https://anfragepro.onrender.com"
+      provider1_email:
+        description: "Verified provider 1 email"
+        required: true
+      provider2_email:
+        description: "Verified provider 2 email"
+        required: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run live E2E
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          PROVIDER1_EMAIL: ${{ inputs.provider1_email }}
+          PROVIDER1_PASSWORD: ${{ secrets.E2E_PROVIDER1_PASSWORD }}
+          PROVIDER2_EMAIL: ${{ inputs.provider2_email }}
+          PROVIDER2_PASSWORD: ${{ secrets.E2E_PROVIDER2_PASSWORD }}
+        run: node scripts/e2e-live-ci.js
