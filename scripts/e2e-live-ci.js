@@ -20,4 +20,4 @@ const source = fs.readFileSync(require.resolve("./e2e-live.js"), "utf8")
   .replace(/const p2Password=await ask\([^;]+;/, 'const p2Password=process.env.PROVIDER2_PASSWORD;');
 
 const runner = require("node:vm");
-runner.runInThisContext(source, {filename:"e2e-live.js"});
+runner.runInNewContext(source, {filename:"e2e-live.js", require, process, console, fetch, URL, setTimeout, clearTimeout, setImmediate, clearImmediate});
