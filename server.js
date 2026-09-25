@@ -336,8 +336,9 @@ app.post("/api/register",registerLimit,async(req,res)=>{
   }else{
    const d=read();
    if(d.users.some(u=>u.email===emailNorm))return res.status(400).json({error:"E-Mail bereits registriert."});
-   const u={id:Date.now(),email:emailNorm,password_hash:await bcrypt.hash(password,12),company,created_at:new Date().toISOString(),phone:"",city:"",services:"",description:""};
-   d.users.push(u);write(d);req.session.userId=u.id;
+   const u={id:Date.now(),email:emailNorm,password_hash:await bcrypt.hash(password,12),company,created_at:new Date().toISOString(),phone:"",city:"",services:"",description:"",email_verified:false,email_verification_token:crypto.randomBytes(32).toString("hex")};
+   u.email_verification_expires=new Date(Date.now()+86400000).toISOString();
+   d.users.push(u);write(d);await sendVerificationEmail(u,u.email_verification_token);req.session.userId=u.id;
    await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
   }
   res.json({ok:true});
@@ -614,10 +615,12 @@ app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
    if(!request)return res.status(404).json({error:"Nicht gefunden"});
    if(request.provider_id&&Number(request.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});
    const providerVerified=(await pool.query("SELECT email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];
-   if(providerVerified&&!providerVerified.email_verified)return res.status(403).json({error:"Bitte zuerst deine E-Mail-Adresse bestätigen."});
+   if(!providerVerified)return res.status(401).json({error:"Dienstleisterkonto nicht gefunden."});
+   if(!providerVerified.email_verified)return res.status(403).json({error:"Bitte zuerst deine E-Mail-Adresse bestätigen."});
    const provider=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];
    providerCompany=provider?.company||"Dienstleister";
-   await pool.query("UPDATE requests SET provider_id=$1 WHERE id=$2",[req.session.userId,id]);
+   const claimed=(await pool.query("UPDATE requests SET provider_id=$1 WHERE id=$2 AND provider_id IS NULL RETURNING id",[req.session.userId,id])).rows[0];
+   if(!claimed)return res.status(409).json({error:"Anfrage wurde gerade von einem anderen Dienstleister übernommen."});
    request.provider_company=providerCompany;
    if(!request.customer_claim_notified_at){
     const sent=await sendCustomerClaimEmail(request);
@@ -628,7 +631,10 @@ app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(r.provider_id&&r.provider_id!==req.session.userId)return res.status(409).json({error:"Anfrage bereits übernommen."});
    const provider=d.users.find(x=>x.id===req.session.userId)||{};
+   if(!provider.id)return res.status(401).json({error:"Dienstleisterkonto nicht gefunden."});
+   if(provider.email_verified!==true)return res.status(403).json({error:"Bitte zuerst deine E-Mail-Adresse bestätigen."});
    r.provider_id=req.session.userId;r.provider_company=provider.company||"Dienstleister";
+   write(d);
    if(!r.customer_claim_notified_at){
     const sent=await sendCustomerClaimEmail(r);
     if(sent)r.customer_claim_notified_at=new Date().toISOString();
@@ -654,6 +660,7 @@ app.post("/api/requests/:id/offer",auth,async(req,res)=>{
    const r=(await pool.query("SELECT provider_id,status,email,name,phone,service,service_type,place,request_token FROM requests WHERE id=$1",[id])).rows[0];
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
+   if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Für diese Anfrage kann kein Angebot mehr gesendet werden."});
    await pool.query("INSERT INTO request_offers(request_id,provider_id,price_min,price_max,availability,message,status,created_at) VALUES($1,$2,$3,$4,$5,$6,'pending',NOW()) ON CONFLICT(request_id) DO UPDATE SET price_min=EXCLUDED.price_min,price_max=EXCLUDED.price_max,availability=EXCLUDED.availability,message=EXCLUDED.message,status='pending',created_at=NOW()",[id,req.session.userId,priceMin,priceMax,availability,message]);
    const provider=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];
    await sendOfferEmail(r,{price_min:priceMin,price_max:priceMax},provider?.company);
@@ -661,6 +668,7 @@ app.post("/api/requests/:id/offer",auth,async(req,res)=>{
    const d=read(),r=d.requests.find(x=>Number(x.id)===id);
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
+   if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Für diese Anfrage kann kein Angebot mehr gesendet werden."});
    d.offers=d.offers||[];
    const old=d.offers.find(x=>Number(x.request_id)===id);
    const offer={id:old?.id||Date.now(),request_id:id,provider_id:req.session.userId,price_min:priceMin,price_max:priceMax,availability,message,status:"pending",created_at:new Date().toISOString()};
@@ -688,17 +696,21 @@ app.post("/api/request-status/:token/offer/accept",async(req,res)=>{
  try{
   const token=String(req.params.token||"");
   if(useDb){
-   const r=(await pool.query("SELECT id,provider_id,name,phone,email,service,service_type,place,request_token FROM requests WHERE request_token=$1",[token])).rows[0];
+   const r=(await pool.query("SELECT id,provider_id,status,name,phone,email,service,service_type,place,request_token FROM requests WHERE request_token=$1",[token])).rows[0];
    if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
-   const o=(await pool.query("SELECT id FROM request_offers WHERE request_id=$1",[r.id])).rows[0];
+   if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr angenommen werden."});
+   const o=(await pool.query("SELECT id,status FROM request_offers WHERE request_id=$1",[r.id])).rows[0];
    if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
-   await pool.query("UPDATE request_offers SET status='accepted' WHERE request_id=$1",[r.id]);
+   if(String(o.status)!=="pending")return res.status(409).json({error:"Dieses Angebot wurde bereits bearbeitet."});
+   await pool.query("UPDATE request_offers SET status='accepted' WHERE request_id=$1 AND status='pending'",[r.id]);
    await pool.query("UPDATE requests SET status='accepted' WHERE id=$1",[r.id]);
    const provider=(await pool.query("SELECT email FROM users WHERE id=$1",[r.provider_id])).rows[0];
    await sendOfferAcceptedEmail(r,provider?.email);
   }else{
    const d=read(),r=d.requests.find(x=>x.request_token===token); if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr angenommen werden."});
    const o=(d.offers||[]).find(x=>Number(x.request_id)===Number(r.id)); if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
+   if(String(o.status)!=="pending")return res.status(409).json({error:"Dieses Angebot wurde bereits bearbeitet."});
    o.status="accepted";r.status="accepted";write(d);
   }
   res.json({ok:true});
@@ -792,11 +804,13 @@ app.patch("/api/requests/:id",auth,async(req,res)=>{
    const r=(await pool.query("SELECT provider_id FROM requests WHERE id=$1",[id])).rows[0];
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
+   if(["cancelled","completed"].includes(String(r.status))&&String(req.body.status)!==String(r.status))return res.status(400).json({error:"Dieser Auftrag ist bereits abgeschlossen oder storniert."});
    await pool.query("UPDATE requests SET status=$1 WHERE id=$2",[req.body.status,id]);
   }else{
    const d=read(),r=d.requests.find(x=>x.id===id);
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(r.provider_id!==req.session.userId)return res.status(403).json({error:"Anfrage zuerst übernehmen."});
+   if(["cancelled","completed"].includes(String(r.status))&&String(req.body.status)!==String(r.status))return res.status(400).json({error:"Dieser Auftrag ist bereits abgeschlossen oder storniert."});
    r.status=req.body.status;write(d);
   }
   res.json({ok:true});
