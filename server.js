@@ -348,7 +348,7 @@ app.post("/api/register",registerLimit,async(req,res)=>{
   }else{
    const d=read();
    if(d.users.some(u=>u.email===emailNorm))return res.status(400).json({error:"E-Mail bereits registriert."});
-   const u={id:Date.now(),email:emailNorm,password_hash:await bcrypt.hash(password,12),company,created_at:new Date().toISOString(),phone:"",city:"",services:"",description:"",email_verified:false,email_verification_token:crypto.randomBytes(32).toString("hex")};
+   const u={id:nextId(),email:emailNorm,password_hash:await bcrypt.hash(password,12),company,created_at:new Date().toISOString(),phone:"",city:"",services:"",description:"",email_verified:false,email_verification_token:crypto.randomBytes(32).toString("hex")};
    u.email_verification_expires=new Date(Date.now()+86400000).toISOString();
    d.users.push(u);write(d);await sendVerificationEmail(u,u.email_verification_token);req.session.userId=u.id;
    await new Promise((resolve,reject)=>req.session.save(err=>err?reject(err):resolve()));
@@ -538,7 +538,7 @@ app.post("/api/requests",publicRequestLimit,upload.array("photos",8),async(req,r
   if(!service_type||!service||!name||!phone||!emailNorm)return res.status(400).json({error:"Bitte alle Pflichtfelder ausfüllen."});
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm))return res.status(400).json({error:"Bitte eine gültige E-Mail-Adresse eingeben."});
   if(String(service).length>200||String(name).length>120||String(phone).length>50||String(description||"").length>3000)return res.status(400).json({error:"Ein Feld ist zu lang."});
-  const id=Date.now(),photoCount=(req.files||[]).length,requestToken=crypto.randomBytes(18).toString("hex"),customerId=req.session.customerId||null;
+  const id=nextId(),photoCount=(req.files||[]).length,requestToken=crypto.randomBytes(18).toString("hex"),customerId=req.session.customerId||null;
   if(useDb) await pool.query(
    "INSERT INTO requests(id,user_id,customer_id,service_type,service,place,date,scope,frequency,description,name,phone,email,photo_count,status,provider_id,created_at,request_token) VALUES($1,NULL,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'new',NULL,NOW(),$14)",
    [id,customerId,service_type,service,place,date,scope,frequency,description,name,phone,emailNorm,photoCount,requestToken]
@@ -856,10 +856,10 @@ app.post("/api/e2e/provision-provider",async(req,res)=>{
   if(useDb){
    const existing=(await pool.query("SELECT id FROM users WHERE email=$1",[email])).rows[0];
    if(existing)await pool.query("UPDATE users SET password_hash=$1,company=$2,phone=$3,city=$4,services=$5,email_verified=TRUE,email_verification_token=NULL,email_verification_expires=NULL WHERE id=$6",[password_hash,company,phone,city,services,existing.id]);
-   else await pool.query("INSERT INTO users(id,email,password_hash,company,phone,city,services,created_at,email_verified) VALUES($1,$2,$3,$4,$5,$6,$7,$8,TRUE)",[Date.now()+Math.floor(Math.random()*100000),email,password_hash,company,phone,city,services,now]);
+   else await pool.query("INSERT INTO users(id,email,password_hash,company,phone,city,services,created_at,email_verified) VALUES($1,$2,$3,$4,$5,$6,$7,$8,TRUE)",[nextId(),email,password_hash,company,phone,city,services,now]);
   }else{
    const d=read(),users=d.users||[],idx=users.findIndex(u=>String(u.email||"").toLowerCase()===email);
-   const user={...(idx>=0?users[idx]:{}),id:idx>=0?users[idx].id:Date.now()+Math.floor(Math.random()*100000),email,password_hash,company,phone,city,services,created_at:idx>=0?users[idx].created_at:now,email_verified:true,email_verification_token:null,email_verification_expires:null};
+   const user={...(idx>=0?users[idx]:{}),id:idx>=0?users[idx].id:nextId(),email,password_hash,company,phone,city,services,created_at:idx>=0?users[idx].created_at:now,email_verified:true,email_verification_token:null,email_verification_expires:null};
    if(idx>=0)users[idx]=user;else users.push(user);d.users=users;write(d);
   }
   res.json({ok:true,email,verified:true});
