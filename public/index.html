@@ -102,6 +102,10 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 #dash .req-claim{width:100%;display:flex;justify-content:space-between;align-items:center;background:#142033!important;color:#fff!important;padding:13px 15px!important;margin-top:12px!important}
 #dash .req-claim span{color:#ffb703;font-size:19px}
 #dash .req-action{margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+body.offer-modal-open{overflow:hidden}
+#offer-modal-overlay input,#offer-modal-overlay textarea{width:100%;box-sizing:border-box;background:#fff;color:#142033;border:1px solid #d1d5db;border-radius:12px;padding:12px;margin:7px 0 10px;font:inherit;pointer-events:auto;touch-action:auto}
+#offer-modal-overlay input:focus,#offer-modal-overlay textarea:focus{outline:none;border-color:#ffb703;box-shadow:0 0 0 4px #ffb70322}
+#offer-modal-overlay button{cursor:pointer;pointer-events:auto;touch-action:manipulation}
 #dash .req-action label{font-size:11px;font-weight:800;color:#667085}
 @media(max-width:650px){#dash .req{padding:16px!important;border-radius:18px!important}#dash .req-head div>b{font-size:18px!important}#dash .req-meta{gap:6px}#dash .req-meta span{font-size:10px;padding:6px 8px}}
 #dash #newCount{background:#dc2626!important;color:#fff;box-shadow:0 8px 20px #dc262644}
@@ -984,21 +988,49 @@ let customerStatusToken="";
 let customerStatusTimer=null;
 
 async function toggleProviderChat(id,token){const box=$("pchat-"+id);if(!box)return;if(box.classList.contains("hide")){await loadChat(token,"pchat-"+id,"provider");clearInterval(chatTimers["pchat-"+id]);chatTimers["pchat-"+id]=setInterval(()=>{if(!box.classList.contains("hide"))loadChat(token,"pchat-"+id,"provider")},5000)}else{box.classList.add("hide");clearInterval(chatTimers["pchat-"+id]);}}
-function toggleOffer(id){
- const el=$("offer-"+id);if(!el)return;
- el.classList.toggle("hide");
- if(!el.classList.contains("hide")){
-  el.style.position="fixed";el.style.left="50%";el.style.top="50%";el.style.transform="translate(-50%,-50%)";
-  el.style.width="min(620px,calc(100vw - 32px))";el.style.maxHeight="calc(100vh - 32px)";el.style.overflow="auto";
-  el.style.zIndex="999999";el.style.boxShadow="0 30px 100px #0008";
-  setTimeout(()=>{const first=$("omin-"+id);if(first){first.focus();first.select&&first.select()}},50);
- }
+function closeOfferModal(){
+ const modal=$("offer-modal-overlay");
+ if(modal)modal.remove();
+ document.body.classList.remove("offer-modal-open");
 }
-async function sendOffer(id){try{
- const payload={price_min:$("omin-"+id).value,price_max:$("omax-"+id).value,availability:$("oavail-"+id).value,message:$("omsg-"+id).value};
- await api("/api/requests/"+id+"/offer",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
- alert("Angebot wurde gesendet.");toggleOffer(id)
-}catch(e){alert(e.message)}}
+function toggleOffer(id){
+ const existing=$("offer-modal-overlay");
+ if(existing){closeOfferModal();return}
+ const overlay=document.createElement("div");
+ overlay.id="offer-modal-overlay";
+ overlay.style.cssText="position:fixed;inset:0;z-index:2147483647;background:rgba(10,18,32,.62);display:flex;align-items:center;justify-content:center;padding:16px;pointer-events:auto";
+ const card=document.createElement("div");
+ card.id="offer-modal-card";
+ card.style.cssText="width:min(620px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;color:#142033;border-radius:24px;padding:22px;box-shadow:0 30px 100px rgba(0,0,0,.45);pointer-events:auto;position:relative";
+ card.innerHTML='<h3 style="margin:0 0 16px;font-size:22px">Dein Angebot</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input id="offer-modal-min" type="number" min="0" step="0.01" placeholder="Preis ab €"><input id="offer-modal-max" type="number" min="0" step="0.01" placeholder="Preis bis €"></div><input id="offer-modal-availability" placeholder="z. B. Donnerstag ab 14 Uhr"><textarea id="offer-modal-message" placeholder="Kurze Nachricht an den Kunden" style="min-height:120px;resize:vertical"></textarea><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px"><button id="offer-modal-send" type="button" style="background:#142033;color:#fff">Angebot senden →</button><button id="offer-modal-cancel" type="button" style="background:#fff;color:#142033;border:1px solid #d1d5db">Abbrechen</button></div>';
+ overlay.appendChild(card);
+ document.body.appendChild(overlay);
+ document.body.classList.add("offer-modal-open");
+ const sourceMin=$("omin-"+id),sourceMax=$("omax-"+id),sourceAvail=$("oavail-"+id),sourceMsg=$("omsg-"+id);
+ if(sourceMin) $("offer-modal-min").value=sourceMin.value;
+ if(sourceMax) $("offer-modal-max").value=sourceMax.value;
+ if(sourceAvail) $("offer-modal-availability").value=sourceAvail.value;
+ if(sourceMsg) $("offer-modal-message").value=sourceMsg.value;
+ overlay.addEventListener("click",e=>{if(e.target===overlay)closeOfferModal()});
+ $("offer-modal-cancel").addEventListener("click",closeOfferModal);
+ $("offer-modal-send").addEventListener("click",()=>sendOfferModal(id));
+ setTimeout(()=>{$("offer-modal-min")?.focus()},30);
+}
+async function sendOfferModal(id){
+ const payload={
+  price_min:$("offer-modal-min").value,
+  price_max:$("offer-modal-max").value,
+  availability:$("offer-modal-availability").value,
+  message:$("offer-modal-message").value
+ };
+ try{
+  await api("/api/requests/"+id+"/offer",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  closeOfferModal();
+  alert("Angebot wurde gesendet.");
+  loadDash();
+ }catch(e){alert(e.message)}
+}
+async function sendOffer(id){return sendOfferModal(id)}
 async function loadChat(token,boxId,role){
  try{
   const d=await api("/api/request-status/"+encodeURIComponent(token)+"/messages"),box=$(boxId);const existing=$( "chatInput-"+boxId);const draft=existing?existing.value:"";
