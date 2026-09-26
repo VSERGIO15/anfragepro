@@ -103,6 +103,14 @@ button{padding:12px 16px;border:0;border-radius:9px;background:var(--accent);col
 #dash .req-claim span{color:#ffb703;font-size:19px}
 #dash .req-action{margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 body.offer-modal-open{overflow:hidden}
+body.chat-modal-open{overflow:hidden}
+#chat-modal-overlay .chat-box{display:block!important;margin:0;background:#fff;color:#142033;border:0;border-radius:18px;padding:0;position:relative;z-index:1;pointer-events:auto}
+#chat-modal-overlay .chat-head{color:#142033}
+#chat-modal-overlay .chat-messages{max-height:45vh;overflow:auto;pointer-events:auto}
+#chat-modal-overlay .chat-compose{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-top:12px;pointer-events:auto}
+#chat-modal-overlay .chat-compose input{background:#fff!important;color:#142033!important;border:1px solid #d1d5db!important;border-radius:12px;padding:12px;pointer-events:auto!important;touch-action:auto!important}
+#chat-modal-overlay .chat-compose button{background:#142033!important;color:#fff!important;pointer-events:auto!important;touch-action:manipulation!important}
+#chat-modal-overlay input:focus{outline:none;border-color:#ffb703!important;box-shadow:0 0 0 4px #ffb70322}
 #offer-modal-overlay input,#offer-modal-overlay textarea{width:100%;box-sizing:border-box;background:#fff;color:#142033;border:1px solid #d1d5db;border-radius:12px;padding:12px;margin:7px 0 10px;font:inherit;pointer-events:auto;touch-action:auto}
 #offer-modal-overlay input:focus,#offer-modal-overlay textarea:focus{outline:none;border-color:#ffb703;box-shadow:0 0 0 4px #ffb70322}
 #offer-modal-overlay button{cursor:pointer;pointer-events:auto;touch-action:manipulation}
@@ -987,7 +995,34 @@ async function saveProfile(e){e.preventDefault();try{await api("/api/profile",{m
 let customerStatusToken="";
 let customerStatusTimer=null;
 
-async function toggleProviderChat(id,token){const box=$("pchat-"+id);if(!box)return;if(box.classList.contains("hide")){await loadChat(token,"pchat-"+id,"provider");clearInterval(chatTimers["pchat-"+id]);chatTimers["pchat-"+id]=setInterval(()=>{if(!box.classList.contains("hide"))loadChat(token,"pchat-"+id,"provider")},5000)}else{box.classList.add("hide");clearInterval(chatTimers["pchat-"+id]);}}
+function closeChatModal(){
+ const modal=$("chat-modal-overlay");
+ if(modal)modal.remove();
+ const key=window.activeChatTimerKey;
+ if(key){clearInterval(chatTimers[key]);delete chatTimers[key];window.activeChatTimerKey="";}
+ document.body.classList.remove("chat-modal-open");
+}
+async function toggleProviderChat(id,token){
+ const existing=$("chat-modal-overlay");
+ if(existing){closeChatModal();return}
+ const overlay=document.createElement("div");
+ overlay.id="chat-modal-overlay";
+ overlay.style.cssText="position:fixed;inset:0;z-index:2147483646;background:rgba(10,18,32,.62);display:flex;align-items:center;justify-content:center;padding:16px;pointer-events:auto";
+ const card=document.createElement("div");
+ card.style.cssText="width:min(760px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;color:#142033;border-radius:24px;padding:22px;box-shadow:0 30px 100px rgba(0,0,0,.45);pointer-events:auto;position:relative";
+ const box=document.createElement("div");
+ box.id="chat-modal-box";
+ box.className="chat-box";
+ card.appendChild(box);
+ overlay.appendChild(card);
+ document.body.appendChild(overlay);
+ document.body.classList.add("chat-modal-open");
+ overlay.addEventListener("click",e=>{if(e.target===overlay)closeChatModal()});
+ window.activeChatTimerKey="chat-modal-provider-"+id;
+ await loadChat(token,"chat-modal-box","provider");
+ clearInterval(chatTimers[window.activeChatTimerKey]);
+ chatTimers[window.activeChatTimerKey]=setInterval(()=>{if($("chat-modal-overlay"))loadChat(token,"chat-modal-box","provider")},5000);
+}
 function closeOfferModal(){
  const modal=$("offer-modal-overlay");
  if(modal)modal.remove();
