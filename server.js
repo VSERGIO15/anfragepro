@@ -242,6 +242,15 @@ async function isAdmin(req){
  const u=read().users.find(x=>Number(x.id)===Number(req.session.userId));return !!u&&String(u.email).toLowerCase()===adminEmail;
 }
 function auth(req,res,next){if(!req.session.userId)return res.status(401).json({error:"Nicht angemeldet"});next();}
+function customerCanAct(req,r){
+ if(!r||r.customer_id==null)return true;
+ return !!req.session.customerId&&Number(req.session.customerId)===Number(r.customer_id);
+}
+function providerStatusAllowed(from,to){
+ const graph={new:["new","contacted","accepted"],contacted:["contacted","accepted"],accepted:["accepted","completed"],completed:["completed"],cancelled:["cancelled"]};
+ return !!graph[String(from||"new")]?.includes(String(to));
+}
+
 
 app.get("/api/provider-portfolio/:id/image",async(req,res)=>{
  try{
@@ -564,14 +573,14 @@ app.get("/api/request-status/:token",async(req,res)=>{
    const norm=x=>String(x||"").trim().toLowerCase();
    const place=norm(r.place),st=norm(r.service_type),sv=norm(r.service);
    if(useDb){
-    const providers=(await pool.query("SELECT city,services FROM users")).rows;
+    const providers=(await pool.query("SELECT city,services FROM users WHERE email_verified=TRUE")).rows;
     matchingProviders=providers.filter(u=>{
      const city=norm(u.city),services=norm(u.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
      return city&&place&&(place.includes(city)||city.includes(place))&&services.some(s=>s&&(st.includes(s)||sv.includes(s)||s.includes(st)||s.includes(sv)));
     }).length;
    }else{
     const d=read();
-    matchingProviders=(d.users||[]).filter(u=>{
+    matchingProviders=(d.users||[]).filter(u=>u.email_verified===true&&u.email).filter(u=>{
      const city=norm(u.city),services=norm(u.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
      return city&&place&&(place.includes(city)||city.includes(place))&&services.some(s=>s&&(st.includes(s)||sv.includes(s)||s.includes(st)||s.includes(sv)));
     }).length;
@@ -613,6 +622,7 @@ app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
   if(useDb){
    request=(await pool.query("SELECT * FROM requests WHERE id=$1",[id])).rows[0];
    if(!request)return res.status(404).json({error:"Nicht gefunden"});
+   if(["cancelled","completed"].includes(String(request.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr übernommen werden."});
    if(request.provider_id&&Number(request.provider_id)!==Number(req.session.userId))return res.status(409).json({error:"Anfrage bereits übernommen."});
    const providerVerified=(await pool.query("SELECT email_verified FROM users WHERE id=$1",[req.session.userId])).rows[0];
    if(!providerVerified)return res.status(401).json({error:"Dienstleisterkonto nicht gefunden."});
@@ -629,6 +639,7 @@ app.post("/api/requests/:id/claim",auth,claimLimit,async(req,res)=>{
   }else{
    const d=read(),r=d.requests.find(x=>x.id===id);
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
+   if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr übernommen werden."});
    if(r.provider_id&&r.provider_id!==req.session.userId)return res.status(409).json({error:"Anfrage bereits übernommen."});
    const provider=d.users.find(x=>x.id===req.session.userId)||{};
    if(!provider.id)return res.status(401).json({error:"Dienstleisterkonto nicht gefunden."});
@@ -698,8 +709,9 @@ app.post("/api/request-status/:token/offer/accept",async(req,res)=>{
  try{
   const token=String(req.params.token||"");
   if(useDb){
-   const r=(await pool.query("SELECT id,provider_id,status,name,phone,email,service,service_type,place,request_token FROM requests WHERE request_token=$1",[token])).rows[0];
+   const r=(await pool.query("SELECT id,customer_id,provider_id,status,name,phone,email,service,service_type,place,request_token FROM requests WHERE request_token=$1",[token])).rows[0];
    if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(!customerCanAct(req,r))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
    if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr angenommen werden."});
    const o=(await pool.query("SELECT id,status FROM request_offers WHERE request_id=$1",[r.id])).rows[0];
    if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
@@ -710,6 +722,7 @@ app.post("/api/request-status/:token/offer/accept",async(req,res)=>{
    await sendOfferAcceptedEmail(r,provider?.email);
   }else{
    const d=read(),r=d.requests.find(x=>x.request_token===token); if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(!customerCanAct(req,r))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
    if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr angenommen werden."});
    const o=(d.offers||[]).find(x=>Number(x.request_id)===Number(r.id)); if(!o)return res.status(404).json({error:"Kein Angebot vorhanden."});
    if(String(o.status)!=="pending")return res.status(409).json({error:"Dieses Angebot wurde bereits bearbeitet."});
@@ -723,11 +736,13 @@ app.get("/api/request-status/:token/messages",async(req,res)=>{
  try{
   const token=String(req.params.token||""); let r,rows=[];
   if(useDb){
-   r=(await pool.query("SELECT id,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
+   r=(await pool.query("SELECT id,customer_id,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
    if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(r.customer_id!=null&&!customerCanAct(req,r)&&Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
    rows=(await pool.query("SELECT sender_role,sender_name,message,created_at FROM request_messages WHERE request_id=$1 ORDER BY id ASC",[r.id])).rows;
   }else{
    const d=read();r=d.requests.find(x=>x.request_token===token);if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(r.customer_id!=null&&!customerCanAct(req,r)&&Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
    rows=(d.messages||[]).filter(x=>Number(x.request_id)===Number(r.id)).sort((a,b)=>Number(a.id)-Number(b.id));
   }
   res.json({messages:rows});
@@ -740,14 +755,16 @@ app.post("/api/request-status/:token/messages",async(req,res)=>{
   if(!message)return res.status(400).json({error:"Nachricht darf nicht leer sein."});
   let r,role,name="";
   if(useDb){
-   r=(await pool.query("SELECT id,status,provider_id,name FROM requests WHERE request_token=$1",[token])).rows[0];
+   r=(await pool.query("SELECT id,customer_id,status,provider_id,name FROM requests WHERE request_token=$1",[token])).rows[0];
    if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(!customerCanAct(req,r)&&Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
    if(!r.provider_id||String(r.status)!=="accepted")return res.status(403).json({error:"Chat ist nach Annahme des Auftrags verfügbar."});
    if(req.session.userId&&Number(req.session.userId)===Number(r.provider_id)){role="provider";const u=(await pool.query("SELECT company FROM users WHERE id=$1",[req.session.userId])).rows[0];name=u?.company||"Dienstleister"}
    else{role="customer";name=r.name||"Kunde"}
    await pool.query("INSERT INTO request_messages(request_id,sender_role,sender_name,message,created_at) VALUES($1,$2,$3,$4,NOW())",[r.id,role,name,message]);
   }else{
    const d=read();r=d.requests.find(x=>x.request_token===token);if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+   if(!customerCanAct(req,r)&&Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
    if(!r.provider_id||!["accepted","contacted"].includes(String(r.status)))return res.status(403).json({error:"Chat ist nach Annahme des Auftrags verfügbar."});
    if(req.session.userId&&Number(req.session.userId)===Number(r.provider_id)){role="provider";const u=d.users.find(x=>Number(x.id)===Number(req.session.userId))||{};name=u.company||"Dienstleister"}else{role="customer";name=r.name||"Kunde"}
    d.messages=d.messages||[];d.messages.push({id:Date.now(),request_id:r.id,sender_role:role,sender_name:name,message,created_at:new Date().toISOString()});write(d);
@@ -759,9 +776,10 @@ app.post("/api/request-status/:token/cancel",async(req,res)=>{
  try{
   const token=String(req.params.token||"");
   let r;
-  if(useDb)r=(await pool.query("SELECT id,status FROM requests WHERE request_token=$1",[token])).rows[0];
+  if(useDb)r=(await pool.query("SELECT id,customer_id,status FROM requests WHERE request_token=$1",[token])).rows[0];
   else r=read().requests.find(x=>x.request_token===token);
   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+  if(!customerCanAct(req,r))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
   if(["completed","cancelled"].includes(String(r.status)))return res.status(400).json({error:"Diese Anfrage kann nicht mehr storniert werden."});
   if(useDb){
    await pool.query("UPDATE requests SET status='cancelled' WHERE id=$1",[r.id]);
@@ -780,9 +798,10 @@ app.post("/api/request-status/:token/review",reviewLimit,async(req,res)=>{
   const comment=String(req.body.comment||"").trim().slice(0,1000);
   if(!Number.isInteger(rating)||rating<1||rating>5)return res.status(400).json({error:"Bitte eine Bewertung von 1 bis 5 Sternen wählen."});
   let r;
-  if(useDb)r=(await pool.query("SELECT id,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
+  if(useDb)r=(await pool.query("SELECT id,customer_id,status,provider_id FROM requests WHERE request_token=$1",[token])).rows[0];
   else r=read().requests.find(x=>x.request_token===token);
   if(!r)return res.status(404).json({error:"Anfrage nicht gefunden."});
+  if(!customerCanAct(req,r))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
   if(r.status!=="completed")return res.status(400).json({error:"Bewertung ist erst nach Abschluss des Auftrags möglich."});
   if(!r.provider_id)return res.status(400).json({error:"Kein Dienstleister zugeordnet."});
   if(useDb){
@@ -806,13 +825,13 @@ app.patch("/api/requests/:id",auth,async(req,res)=>{
    const r=(await pool.query("SELECT provider_id,status FROM requests WHERE id=$1",[id])).rows[0];
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Anfrage zuerst übernehmen."});
-   if(["cancelled","completed"].includes(String(r.status))&&String(req.body.status)!==String(r.status))return res.status(400).json({error:"Dieser Auftrag ist bereits abgeschlossen oder storniert."});
+   if(!providerStatusAllowed(r.status,req.body.status))return res.status(400).json({error:"Dieser Statuswechsel ist nicht erlaubt."});
    await pool.query("UPDATE requests SET status=$1 WHERE id=$2",[req.body.status,id]);
   }else{
    const d=read(),r=d.requests.find(x=>x.id===id);
    if(!r)return res.status(404).json({error:"Nicht gefunden"});
    if(r.provider_id!==req.session.userId)return res.status(403).json({error:"Anfrage zuerst übernehmen."});
-   if(["cancelled","completed"].includes(String(r.status))&&String(req.body.status)!==String(r.status))return res.status(400).json({error:"Dieser Auftrag ist bereits abgeschlossen oder storniert."});
+   if(!providerStatusAllowed(r.status,req.body.status))return res.status(400).json({error:"Dieser Statuswechsel ist nicht erlaubt."});
    r.status=req.body.status;write(d);
   }
   res.json({ok:true});
