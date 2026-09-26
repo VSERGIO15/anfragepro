@@ -140,6 +140,11 @@ async function loginProvider(label,email,password){
   const wrongAccept=await c2.c.request("/api/request-status/"+req.request_token+"/offer/accept",{method:"POST",body:{}});
   ok(wrongAccept.status===403,"fremder Kunde kann Angebot nicht annehmen");
 
+  const winnerOffer=await winner.c.request("/api/requests/"+req.id+"/offer",{method:"POST",body:{
+    price_min:90,price_max:120,availability:"E2E-Test",message:"Automatisches E2E-Angebot"
+  }});
+  ok(winnerOffer.status===200,"Gewinner kann Angebot senden");
+
   const accept=await c1.c.request("/api/request-status/"+req.request_token+"/offer/accept",{method:"POST",body:{}});
   ok(accept.status===200,"Kunde kann Angebot annehmen");
 
