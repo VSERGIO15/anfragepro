@@ -8,6 +8,9 @@ on:
         required: true
         default: "https://anfragepro.onrender.com"
 
+permissions:
+  contents: read
+
 jobs:
   provision:
     runs-on: ubuntu-latest
