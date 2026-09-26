@@ -808,9 +808,12 @@ app.post("/api/request-status/:token/review",reviewLimit,async(req,res)=>{
   if(r.status!=="completed")return res.status(400).json({error:"Bewertung ist erst nach Abschluss des Auftrags möglich."});
   if(!r.provider_id)return res.status(400).json({error:"Kein Dienstleister zugeordnet."});
   if(useDb){
-   const exists=await pool.query("SELECT id FROM request_reviews WHERE request_id=$1",[r.id]);
-   if(exists.rowCount)return res.status(409).json({error:"Diese Anfrage wurde bereits bewertet."});
-   await pool.query("INSERT INTO request_reviews(request_id,rating,comment,created_at) VALUES($1,$2,$3,NOW())",[r.id,rating,comment]);
+   try{
+    await pool.query("INSERT INTO request_reviews(request_id,rating,comment,created_at) VALUES($1,$2,$3,NOW())",[r.id,rating,comment]);
+   }catch(e){
+    if(e&&e.code==="23505")return res.status(409).json({error:"Diese Anfrage wurde bereits bewertet."});
+    throw e;
+   }
   }else{
    const d=read();d.reviews=d.reviews||[];
    if(d.reviews.some(x=>Number(x.request_id)===Number(r.id)))return res.status(409).json({error:"Diese Anfrage wurde bereits bewertet."});
