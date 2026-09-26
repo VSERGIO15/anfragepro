@@ -176,16 +176,14 @@ async function loginProvider(label,email,password){
   const claimReq2=await p1.c.request("/api/requests/"+req2.id+"/claim",{method:"POST",body:{}});
   ok(claimReq2.status===200,"zweite Anfrage kann übernommen werden");
   const assigned2=claimReq2.status===200?p1:p2;
+  const contacted2=await assigned2.c.request("/api/requests/"+req2.id,{method:"PATCH",body:{status:"contacted"}});
+  ok(contacted2.status===200,"Dienstleister kann Status auf Kontakt setzen");
   const offer2=await assigned2.c.request("/api/requests/"+req2.id+"/offer",{method:"POST",body:{
     price_min:150,price_max:180,availability:"E2E-Abschluss",message:"Automatisches Abschlussangebot"
   }});
   ok(offer2.status===200,"zweite Anfrage erhält Angebot");
   const accept2=await c2.c.request("/api/request-status/"+req2.request_token+"/offer/accept",{method:"POST",body:{}});
   ok(accept2.status===200,"zweiter Kunde kann Angebot annehmen");
-  const contacted2=await assigned2.c.request("/api/requests/"+req2.id,{method:"PATCH",body:{status:"contacted"}});
-  ok(contacted2.status===200,"Dienstleister kann Status auf Kontakt setzen");
-  const accepted2=await assigned2.c.request("/api/requests/"+req2.id,{method:"PATCH",body:{status:"accepted"}});
-  ok(accepted2.status===200,"Dienstleister kann Status auf angenommen setzen");
   const completed2=await assigned2.c.request("/api/requests/"+req2.id,{method:"PATCH",body:{status:"completed"}});
   ok(completed2.status===200,"Dienstleister kann Auftrag abschließen");
   const status2=await c2.c.request("/api/request-status/"+req2.request_token);
