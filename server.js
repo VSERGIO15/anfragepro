@@ -21,6 +21,9 @@ const write=d=>fs.writeFileSync(DATA,JSON.stringify(d,null,2));
 const useDb=!!process.env.DATABASE_URL;
 const pool=useDb?new Pool({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:false}}):null;
 
+let idClock=0,idSequence=0;
+function nextId(){const now=Date.now();if(now===idClock){idSequence=(idSequence+1)%1000;}else{idClock=now;idSequence=0;}return now*1000+idSequence;}
+
 const rateBuckets=new Map();
 function rateLimit({windowMs,max,keyPrefix}){
  return (req,res,next)=>{
@@ -286,7 +289,7 @@ app.post("/api/provider-portfolio",auth,upload.array("photos",6),async(req,res)=
   }else{
    const d=read();d.provider_portfolio=d.provider_portfolio||[];const own=d.provider_portfolio.filter(x=>Number(x.provider_id)===Number(req.session.userId));
    if(own.length+files.length>6)return res.status(400).json({error:"Maximal 6 Arbeitsbeispiele erlaubt."});
-   files.forEach(f=>d.provider_portfolio.push({id:Date.now()+Math.random(),provider_id:req.session.userId,image_url:"/uploads/"+f.filename,created_at:new Date().toISOString()}));write(d);
+   files.forEach(f=>d.provider_portfolio.push({id:nextId(),provider_id:req.session.userId,image_url:"/uploads/"+f.filename,created_at:new Date().toISOString()}));write(d);
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Bilder konnten nicht gespeichert werden."});}
@@ -337,7 +340,7 @@ app.post("/api/register",registerLimit,async(req,res)=>{
   if(useDb){
    const exists=await pool.query("SELECT id FROM users WHERE email=$1",[emailNorm]);
    if(exists.rowCount)return res.status(400).json({error:"E-Mail bereits registriert."});
-   const id=Date.now();
+   const id=nextId();
    await pool.query("INSERT INTO users(id,email,password_hash,company,created_at) VALUES($1,$2,$3,$4,NOW())",[id,emailNorm,await bcrypt.hash(password,12),company]);
    const verifyToken=crypto.randomBytes(32).toString("hex"); await pool.query("UPDATE users SET email_verification_token=$1,email_verification_expires=NOW()+INTERVAL '24 hours' WHERE id=$2",[verifyToken,id]); await sendVerificationEmail({email:emailNorm},verifyToken);
    req.session.userId=id;
@@ -684,7 +687,7 @@ app.post("/api/requests/:id/offer",auth,async(req,res)=>{
    if(["cancelled","completed"].includes(String(r.status)))return res.status(400).json({error:"Für diese Anfrage kann kein Angebot mehr gesendet werden."});
    d.offers=d.offers||[];
    const old=d.offers.find(x=>Number(x.request_id)===id);
-   const offer={id:old?.id||Date.now(),request_id:id,provider_id:req.session.userId,price_min:priceMin,price_max:priceMax,availability,message,status:"pending",created_at:new Date().toISOString()};
+   const offer={id:old?.id||nextId(),request_id:id,provider_id:req.session.userId,price_min:priceMin,price_max:priceMax,availability,message,status:"pending",created_at:new Date().toISOString()};
    if(old)Object.assign(old,offer);else d.offers.push(offer);write(d);
   }
   res.json({ok:true});
@@ -767,7 +770,7 @@ app.post("/api/request-status/:token/messages",async(req,res)=>{
    if(!customerCanAct(req,r)&&Number(r.provider_id)!==Number(req.session.userId))return res.status(403).json({error:"Bitte über das zugehörige Kundenkonto anmelden."});
    if(!r.provider_id||!["accepted","contacted"].includes(String(r.status)))return res.status(403).json({error:"Chat ist nach Annahme des Auftrags verfügbar."});
    if(req.session.userId&&Number(req.session.userId)===Number(r.provider_id)){role="provider";const u=d.users.find(x=>Number(x.id)===Number(req.session.userId))||{};name=u.company||"Dienstleister"}else{role="customer";name=r.name||"Kunde"}
-   d.messages=d.messages||[];d.messages.push({id:Date.now(),request_id:r.id,sender_role:role,sender_name:name,message,created_at:new Date().toISOString()});write(d);
+   d.messages=d.messages||[];d.messages.push({id:nextId(),request_id:r.id,sender_role:role,sender_name:name,message,created_at:new Date().toISOString()});write(d);
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Nachricht konnte nicht gesendet werden."});}
@@ -811,7 +814,7 @@ app.post("/api/request-status/:token/review",reviewLimit,async(req,res)=>{
   }else{
    const d=read();d.reviews=d.reviews||[];
    if(d.reviews.some(x=>Number(x.request_id)===Number(r.id)))return res.status(409).json({error:"Diese Anfrage wurde bereits bewertet."});
-   d.reviews.push({id:Date.now(),request_id:r.id,rating,comment,created_at:new Date().toISOString()});write(d);
+   d.reviews.push({id:nextId(),request_id:r.id,rating,comment,created_at:new Date().toISOString()});write(d);
   }
   res.json({ok:true});
  }catch(e){console.error(e);res.status(500).json({error:"Bewertung konnte nicht gespeichert werden."});}
