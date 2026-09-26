@@ -132,16 +132,28 @@ async function loginProvider(label,email,password){
   ok(status.status===200 && status.data?.claimed===true,"Anfrage ist genau einem Provider zugeordnet");
   ok(Number(status.data?.provider_id)===Number(winner.me.id),"zugeordneter Provider ist der Gewinner");
 
-  const offer=await winner.c.request("/api/requests/"+req.id+"/offer",{method:"POST",body:{
-    price_min:100,price_max:150,availability:"Morgen 10:00",message:"E2E Testangebot"
+  const loserOffer=await loser.c.request("/api/requests/"+req.id+"/offer",{method:"POST",body:{
+    price_min:90,price_max:120,message:"Darf nicht funktionieren"
   }});
-  ok(offer.status===200,"Gewinner kann Angebot senden");
+  ok(loserOffer.status===403,"verlierender Provider kann kein Angebot senden");
+
+  const wrongAccept=await c2.c.request("/api/request-status/"+req.request_token+"/offer/accept",{method:"POST",body:{}});
+  ok(wrongAccept.status===403,"fremder Kunde kann Angebot nicht annehmen");
 
   const accept=await c1.c.request("/api/request-status/"+req.request_token+"/offer/accept",{method:"POST",body:{}});
   ok(accept.status===200,"Kunde kann Angebot annehmen");
 
+  const chat=await c1.c.request("/api/request-status/"+req.request_token+"/messages",{method:"POST",body:{message:"E2E Chatnachricht"}});
+  ok(chat.status===200,"zugehöriger Kunde kann Chatnachricht senden");
+
+  const wrongChat=await c2.c.request("/api/request-status/"+req.request_token+"/messages",{method:"POST",body:{message:"Darf nicht funktionieren"}});
+  ok(wrongChat.status===403,"fremder Kunde kann nicht in den Chat schreiben");
+
   const acceptAgain=await c1.c.request("/api/request-status/"+req.request_token+"/offer/accept",{method:"POST",body:{}});
   ok(acceptAgain.status===409,"zweite Annahme wird mit 409 abgelehnt");
+
+  const wrongCancel=await c2.c.request("/api/request-status/"+req.request_token+"/cancel",{method:"POST",body:{}});
+  ok(wrongCancel.status===403,"fremder Kunde kann Auftrag nicht stornieren");
 
   const cancel=await c1.c.request("/api/request-status/"+req.request_token+"/cancel",{method:"POST",body:{}});
   ok(cancel.status===200,"Kunde kann Auftrag nach Annahme stornieren");
