@@ -55,7 +55,7 @@ Vor dem Launch testen:
 - [ ] Resend-Absenderdomain ist eingerichtet und `RESEND_FROM` ist gültig.
 - [ ] E-Mail-Verifizierung für Dienstleister wurde getestet.
 - [ ] Impressum und Datenschutzerklärung enthalten echte, geprüfte Angaben.
-- [ ] E2E-Provisionierungssecret ist separat und lang zufällig; E2E-Workflow bleibt nur для тестов.
+- [ ] E2E-Provisionierungssecret ist separat und lang zufällig; E2E-Workflow bleibt nur für Tests.
 - [ ] Nach Deployment: `Live E2E` grün ausführen.
 
 ## Live E2E
