@@ -14,12 +14,19 @@ on:
         description: "Verified provider 2 email"
         required: true
 
+concurrency:
+  group: live-e2e
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run live E2E
         env:
