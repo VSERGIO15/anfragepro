@@ -91,18 +91,18 @@ async function loginProvider(label,email,password){
   const services=String(p1.me.services).split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
   const service=services[0]||"Dienstleistung";
 
-  const createRequest=async(client,n)=>{
+  const createRequest=async(client,n,email)=>{
     const r=await client.request("/api/requests",{method:"POST",body:{
       service_type:service,service,place:city,date:"",scope:"E2E",frequency:"einmalig",
       description:"Automatischer E2E-Test — bitte ignorieren.",
-      name:"E2E Kunde "+n,phone:"+491234567890",email:client.email
+      name:"E2E Kunde "+n,phone:"+491234567890",email
     }});
     ok(r.status===200 && r.data?.request_token,"Client "+n+" kann Anfrage erstellen");
     return r.data;
   };
 
-  const req=await createRequest(c1.c,1);
-  const req2=await createRequest(c2.c,2);
+  const req=await createRequest(c1.c,1,c1.email);
+  const req2=await createRequest(c2.c,2,c2.email);
 
   const own1=await c1.c.request("/api/customer/requests");
   const own2=await c2.c.request("/api/customer/requests");
