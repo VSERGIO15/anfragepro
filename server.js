@@ -44,7 +44,7 @@ setInterval(()=>{const now=Date.now();for(const [k,b] of rateBuckets)if(now-b.st
 
 const publicRequestLimit=rateLimit({windowMs:60*60*1000,max:10,keyPrefix:"request"});
 const loginLimit=rateLimit({windowMs:15*60*1000,max:10,keyPrefix:"login"});
-const registerLimit=rateLimit({windowMs:60*60*1000,max:5,keyPrefix:"register"});
+const registerLimit=rateLimit({windowMs:60*60*1000,max:10,keyPrefix:"register"});
 const reviewLimit=rateLimit({windowMs:60*60*1000,max:10,keyPrefix:"review"});
 const claimLimit=rateLimit({windowMs:15*60*1000,max:30,keyPrefix:"claim"});
 
